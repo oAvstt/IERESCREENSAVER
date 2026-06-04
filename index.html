@@ -3,22 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iere Screensaver Pro</title>
+    <title>Iere Screensaver Master Pro</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Montserrat:wght@300;400;700&family=Oswald:wght@300;700&family=Syncopate:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
         :root {
-            /* Default Cinematic Gradient */
+            /* Default Layout States */
             --bg-gradient: linear-gradient(-45deg, #ff5e62, #ff9966, #ffb347, #ffcc33);
             --text-color: #ffffff;
             --circle-color: #ffffff;
+            --circle-bg: rgba(255, 255, 255, 0);
+            --circle-glow: 0px;
+            
+            /* Typography Variables */
+            --main-font: 'Inter', sans-serif;
+            --sub-font: 'Inter', sans-serif;
+
+            /* Environment Vectors */
+            --gradient-speed: 15s;
+            --bg-brightness: 100%;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
             user-select: none;
         }
 
@@ -26,19 +35,45 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #000;
+            background-color: #050505;
         }
 
-        /* Live Gradient Background */
+        /* Full Screen Gateway Security Wall */
+        #lock-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a;
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), pointer-events 0.6s ease;
+        }
+        #lock-screen.unlocked {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .lock-container {
+            width: 360px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        }
+
+        /* Live Gradient Background Engine */
         #gradient-bg {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-gradient);
             background-size: 400% 400%;
-            animation: gradientFlow 15s ease infinite;
+            animation: gradientFlow var(--gradient-speed) ease infinite;
+            filter: brightness(var(--bg-brightness));
             z-index: 1;
         }
 
@@ -48,24 +83,16 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Particle Canvas */
         #particles-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2;
             pointer-events: none;
         }
 
-        /* Main Content Overlay */
         #content-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 3;
             display: flex;
             flex-direction: column;
@@ -74,13 +101,10 @@
             text-align: center;
         }
 
-        /* Optional Backdrop Tint Panel */
         #content-tint-box {
             padding: 40px 60px;
             border-radius: 24px;
-            background: rgba(0, 0, 0, 0); /* Managed dynamically via JS */
-            backdrop-filter: blur(0px);
-            -webkit-backdrop-filter: blur(0px);
+            background: rgba(0, 0, 0, 0);
             transition: all 0.5s ease;
             display: flex;
             flex-direction: column;
@@ -90,17 +114,18 @@
         }
 
         #main-text {
+            font-family: var(--main-font);
             font-size: 3rem;
             font-weight: 300;
             color: var(--text-color);
             margin-bottom: 30px;
             letter-spacing: 4px;
             text-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
             cursor: pointer;
         }
 
         #sub-text {
+            font-family: var(--sub-font);
             font-size: 1.2rem;
             font-weight: 300;
             color: var(--text-color);
@@ -116,27 +141,28 @@
             align-items: center;
             justify-content: center;
             gap: 30px;
-            padding: 20px;
+            padding: 40px;
         }
 
-        /* Decorative Logo Circle Accent */
+        /* Enhanced Corona Circle Component */
         #logo-circle {
             position: absolute;
-            width: 340px;
-            height: 340px;
+            width: 320px;
+            height: 320px;
             border: 2px solid var(--circle-color);
+            background: var(--circle-bg);
             border-radius: 50%;
             display: none;
             pointer-events: none;
-            filter: drop-shadow(0 0 15px var(--circle-color));
-            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 var(--circle-glow) var(--circle-color));
+            transition: background 0.3s ease, border-color 0.3s ease;
             z-index: 0;
         }
 
         #logo, .event-logo-slot {
-            max-width: 260px;
-            width: 18vw;
-            min-width: 130px;
+            max-width: 240px;
+            width: 16vw;
+            min-width: 125px;
             cursor: pointer;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -145,225 +171,117 @@
 
         .event-logo-slot {
             display: none;
-            max-height: 180px;
+            max-height: 160px;
             width: auto;
         }
 
-        #logo:hover, .event-logo-slot:hover {
-            transform: scale(1.05);
-        }
+        #logo:hover, .event-logo-slot:hover { transform: scale(1.05); }
 
-        /* Fullscreen Auto-hide Integration */
         #fullscreen-btn {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
+            bottom: 30px; right: 30px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
+            color: white; width: 50px; height: 50px; border-radius: 50%;
+            font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 10;
             transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
         }
+        #fullscreen-btn:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.1); }
 
-        #fullscreen-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.1);
-        }
-
-        /* Completely hide full screen control button when system environment is in full screen mode */
+        /* Fullscreen Flag Auto Hide Button rules */
         :fullscreen #fullscreen-btn { display: none !important; }
         :-webkit-full-screen #fullscreen-btn { display: none !important; }
 
-        /* Security Verification Screen */
-        #password-modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 360px;
-            background: rgba(25, 25, 25, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 30px;
-            color: white;
-            z-index: 101;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-
-        #password-modal.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* Settings Master Panel */
+        /* Master Control Panel Overlay UI */
         #settings-modal {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            width: 460px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            background: rgba(20, 20, 20, 0.65);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            width: 480px; max-height: 85vh;
+            display: flex; flex-direction: column;
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            color: white;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-radius: 24px; padding: 30px; color: white;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.6);
         }
-
-        #settings-modal.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        #settings-modal.active { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1); }
 
         .settings-header {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
-            flex-shrink: 0;
+            font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 600;
+            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 12px; flex-shrink: 0;
         }
 
-        .settings-scroll-area {
-            overflow-y: auto;
-            padding-right: 15px;
-            margin-bottom: 15px;
-        }
-
+        .settings-scroll-area { overflow-y: auto; padding-right: 12px; margin-bottom: 15px; }
         .settings-scroll-area::-webkit-scrollbar { width: 6px; }
-        .settings-scroll-area::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .settings-scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .settings-scroll-area::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        .settings-scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
-        .setting-group {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .setting-group label {
-            font-size: 0.9rem;
-            color: #aaa;
-        }
+        .setting-group { margin-bottom: 22px; display: flex; flex-direction: column; gap: 8px; }
+        .setting-group label { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #b3b3b3; }
 
         input[type="text"], input[type="password"], select {
-            width: 100%;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            outline: none;
+            width: 100%; padding: 11px; background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+            color: white; font-size: 0.95rem; outline: none; transition: border 0.2s;
         }
-        
-        input[type="text"]:focus, input[type="password"]:focus, select:focus {
-            border-color: #ff9966;
-        }
+        input[type="text"]:focus, select:focus { border-color: #ff9966; }
 
-        input[type="range"] {
-            width: 100%;
-            accent-color: #ff9966;
-            cursor: pointer;
-        }
+        input[type="range"] { width: 100%; accent-color: #ff9966; cursor: pointer; }
+        option { background: #141414; color: white; }
 
-        option { background: #222; color: white; }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-direction: row;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
+        .toggle-container { display: flex; align-items: center; justify-content: space-between; flex-direction: row; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            transition: .4s;
-            border-radius: 34px;
-            border: 1px solid rgba(255,255,255,0.2);
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5); transition: .3s; border-radius: 22px;
+            border: 1px solid rgba(255,255,255,0.15);
         }
-
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px; width: 16px; left: 4px; bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: white; transition: .3s; border-radius: 50%;
         }
-
         input:checked + .slider { background-color: #ff9966; }
         input:checked + .slider:before { transform: translateX(24px); }
 
         .action-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: opacity 0.3s;
+            width: 100%; padding: 13px; border: none; border-radius: 8px;
+            color: white; font-weight: 600; font-size: 0.95rem; cursor: pointer;
+            transition: opacity 0.2s;
         }
-
         .btn-gradient { background: linear-gradient(90deg, #ff9966, #ff5e62); }
-        .btn-danger { background: rgba(233, 64, 87, 0.3); border: 1px solid rgba(233, 64, 87, 0.5); margin-top: 5px;}
+        .btn-danger { background: rgba(233, 64, 87, 0.2); border: 1px solid rgba(233, 64, 87, 0.4); margin-top: 4px; }
         .action-btn:hover { opacity: 0.9; }
 
         .color-pickers { display: none; gap: 10px; }
         .color-pickers.active { display: flex; }
         .color-pickers input[type="color"] {
-            border: none; width: 100%; height: 40px; border-radius: 8px; background: none; cursor: pointer;
+            border: none; width: 100%; height: 38px; border-radius: 8px; background: none; cursor: pointer;
         }
-
-        .mic-badge {
-            font-size: 0.7rem; background: #ff5e62; padding: 2px 6px; border-radius: 4px; margin-left: 10px; color: white;
-        }
-        
-        .row-flex { display: flex; gap: 10px; align-items: center; }
+        .mic-badge { font-size: 0.7rem; background: #ff5e62; padding: 2px 6px; border-radius: 4px; margin-left: 8px; color: white; }
     </style>
 </head>
 <body>
 
+    <!-- System Lockdown Veil Curtain -->
+    <div id="lock-screen">
+        <div class="lock-container">
+            <h2 style="color: white; font-family: 'Inter', sans-serif; font-weight: 400; margin-bottom: 20px; font-size: 1.2rem; letter-spacing: 2px;">SYSTEM LOCK</h2>
+            <div class="setting-group" style="text-align: left;">
+                <label>Enter Passkey Authorization</label>
+                <input type="password" id="gate-pass-input" placeholder="••••••••" style="text-align: center; font-size: 1.2rem; letter-spacing: 3px;">
+            </div>
+            <button id="gate-submit-btn" class="action-btn btn-gradient" style="margin-top: 10px;">Authenticate System</button>
+        </div>
+    </div>
+
+    <!-- Live Render Modules -->
     <div id="gradient-bg"></div>
     <canvas id="particles-canvas"></canvas>
 
@@ -383,34 +301,47 @@
 
     <button id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
 
-    <!-- Password Prompt -->
-    <div id="password-modal">
-        <div class="settings-header">Security Access</div>
-        <div class="setting-group">
-            <label>Enter Password to Open Panel</label>
-            <input type="password" id="password-input" placeholder="••••••••">
-        </div>
-        <button id="password-submit-btn" class="action-btn btn-gradient">Verify</button>
-    </div>
-
-    <!-- Master Settings Panel -->
+    <!-- Master Control Settings Panel Grid -->
     <div id="settings-modal">
-        <div class="settings-header">System Settings</div>
+        <div class="settings-header">System Control Deck</div>
         
         <div class="settings-scroll-area">
-            <!-- Text Modules -->
+            <!-- Typography Headers Config -->
             <div class="setting-group">
-                <label>Main Headline Text</label>
+                <label>Main Headline Wording</label>
                 <input type="text" id="input-main-text" value="PREMIUM VISUALS">
             </div>
 
             <div class="setting-group">
-                <label>Sub-Headline Text</label>
+                <label>Main Headline Font Family</label>
+                <select id="select-main-font">
+                    <option value="'Inter', sans-serif">Inter (Modern Light)</option>
+                    <option value="'Oswald', sans-serif">Oswald (Bold Compact)</option>
+                    <option value="'Cinzel', serif">Cinzel (Classic Royal)</option>
+                    <option value="'Syncopate', sans-serif">Syncopate (Extended Tech)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat (Clean Geometric)</option>
+                    <option value="'Playfair Display', serif">Playfair (Premium Fine Serif)</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label>Sub-Headline Wording</label>
                 <input type="text" id="input-sub-text" value="Triple-click the logo for settings">
             </div>
 
+            <div class="setting-group">
+                <label>Sub-Headline Font Family</label>
+                <select id="select-sub-font">
+                    <option value="'Inter', sans-serif">Inter (Modern Light)</option>
+                    <option value="'Oswald', sans-serif">Oswald (Bold Compact)</option>
+                    <option value="'Cinzel', serif">Cinzel (Classic Royal)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat (Clean Geometric)</option>
+                    <option value="'Playfair Display', serif">Playfair (Premium Fine Serif)</option>
+                </select>
+            </div>
+
             <div class="setting-group toggle-container">
-                <label>Contrast Tint Plate Behind Text & Logos</label>
+                <label>Contrast Text Tint Backplate Panel</label>
                 <label class="switch">
                     <input type="checkbox" id="tint-box-toggle">
                     <span class="slider"></span>
@@ -419,9 +350,9 @@
 
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
 
-            <!-- Core Asset Management -->
+            <!-- Core Assets -->
             <div class="setting-group">
-                <label>Primary Main Logo Image Source</label>
+                <label>Primary Main Image Vector Source</label>
                 <select id="main-logo-select">
                     <option value="iere-logo.png">Original (iere-logo.png)</option>
                     <option value="iere-logo1.png">Logo 1 (iere-logo1.png)</option>
@@ -433,60 +364,73 @@
                 </select>
             </div>
 
-            <!-- Logo Ring Accent Controls -->
+            <!-- Corona Ring Modules with Fills & Glow Targets -->
             <div class="setting-group toggle-container">
-                <label>Enable Ambient Circle Ring Accent</label>
+                <label>Enable Dynamic Halo Circle Ring</label>
                 <label class="switch">
                     <input type="checkbox" id="circle-toggle">
                     <span class="slider"></span>
                 </label>
             </div>
-            
-            <div class="setting-group" id="circle-color-group" style="display: none;">
-                <label>Circle Aura Color</label>
-                <input type="color" id="input-circle-color" value="#ffffff" style="width:100%; height:40px; border-radius:8px; border:none; background:none; cursor:pointer;">
+
+            <div id="extended-circle-controls" style="display: none; flex-direction: column; gap: 15px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; margin-bottom: 15px;">
+                <div class="setting-group toggle-container">
+                    <label>Fill Inner Circle Solid Background</label>
+                    <label class="switch">
+                        <input type="checkbox" id="circle-fill-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label>Circle Boundary Vector Color</label>
+                    <input type="color" id="input-circle-color" value="#ffffff" style="width:100%; height:36px; border-radius:8px; border:none; background:none; cursor:pointer;">
+                </div>
+                <div class="setting-group">
+                    <label>Corona Outer Radial Glow Glow Power</label>
+                    <input type="range" id="input-circle-glow" min="0" max="60" value="0" step="1">
+                </div>
             </div>
 
-            <!-- Enhanced Multi Event Logo Modules -->
-            <div class="setting-group" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.15);">
-                <label style="font-weight: 600; color: #fff;">Event Logo Managers (Max 3)</label>
-                <div style="margin-top: 10px; display:flex; flex-direction:column; gap:10px;">
+            <!-- Event Multi Upload Matrix -->
+            <div class="setting-group" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.2);">
+                <label style="font-weight: 600; color: #fff;">Event Presentation Logos (Max 3 Slots)</label>
+                <div style="margin-top: 10px; display:flex; flex-direction:column; gap:12px;">
                     <div>
-                        <label>Target Placement Slot</label>
+                        <label>Target Channel Mapping Node</label>
                         <select id="event-slot-index">
-                            <option value="1">Event Slot 1</option>
-                            <option value="2">Event Slot 2</option>
-                            <option value="3">Event Slot 3</option>
+                            <option value="1">Event Slot Array 1</option>
+                            <option value="2">Event Slot Array 2</option>
+                            <option value="3">Event Slot Array 3</option>
                         </select>
                     </div>
                     <div>
-                        <label>Upload Image File</label>
-                        <input type="file" id="custom-logo-upload" accept="image/*" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
+                        <label>Select Matrix Image File Source</label>
+                        <input type="file" id="custom-logo-upload" accept="image/*" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white;">
                     </div>
-                    <button id="remove-event-logo-btn" class="action-btn btn-danger">Remove Selected Logo</button>
+                    <button id="remove-event-logo-btn" class="action-btn btn-danger">Flush Selected Slot Target Image</button>
                 </div>
             </div>
 
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
 
-            <!-- Background Profiles -->
+            <!-- Ambient Background Engine Adjusters -->
             <div class="setting-group">
-                <label>Gradient Layout Type</label>
+                <label>Gradient Layout Mapping Profile</label>
                 <select id="gradient-type-select">
-                    <option value="linear">Linear Sweep (Classic)</option>
-                    <option value="radial">Radial Hub (Pulsing Ambient Center)</option>
+                    <option value="linear">Linear Sweep Matrix</option>
+                    <option value="radial">Radial Hub Ambient Center</option>
                 </select>
             </div>
 
             <div class="setting-group">
-                <label>Cinematic Color Palette</label>
+                <label>Color Profiles</label>
                 <select id="gradient-select">
                     <option value="#ff5e62, #ff9966, #ffb347, #ffcc33">Bocas Sunset (Warm)</option>
                     <option value="#00c6ff, #0072ff, #1cb5e0, #000046">Maracas Deep (Ocean)</option>
                     <option value="#8A2387, #E94057, #F27121">Scarlet Ibis (Vibrant)</option>
-                    <option value="#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3">Trinidad Carnival Rainbow</option>
+                    <option value="#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3">Trinidad Carnival Spectrum (Rainbow)</option>
                     <option value="#232526, #414345, #0f2027, #203a43">Pitch Midnight (Dark)</option>
-                    <option value="custom">Custom Configuration...</option>
+                    <option value="custom">Custom Configuration Coordinate...</option>
                 </select>
             </div>
 
@@ -495,19 +439,30 @@
                 <input type="color" id="color2" value="#ff9966">
             </div>
 
+            <div class="setting-group">
+                <label>Gradient Vector Flow Cycle Speed (Duration)</label>
+                <input type="range" id="gradient-speed-slider" min="2" max="40" value="15" step="1">
+            </div>
+
+            <div class="setting-group">
+                <label>Monitor Backlight Brightness Level</label>
+                <input type="range" id="gradient-brightness-slider" min="20" max="150" value="100" step="5">
+            </div>
+
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
 
-            <!-- Advanced System Particles -->
+            <!-- Particles Physics Control Grid -->
             <div class="setting-group">
-                <label>Particle Engine System Style</label>
+                <label>Canvas Fluid System Profile</label>
                 <select id="particle-style-select">
-                    <option value="dust">Ethereal Ambient Space Dust</option>
-                    <option value="fire">Cinematic Rising Embers (Fire Style)</option>
+                    <option value="dust">Ethereal Space Floating Dust</option>
+                    <option value="fire">Cinematic Rising Embers</option>
+                    <option value="actual-fire">Authentic Turbulent Fluid Flame Box</option>
                 </select>
             </div>
 
             <div class="setting-group toggle-container">
-                <label>Render Canvas Particles</label>
+                <label>Render Active Fluid Particles</label>
                 <label class="switch">
                     <input type="checkbox" id="particle-toggle" checked>
                     <span class="slider"></span>
@@ -515,17 +470,17 @@
             </div>
 
             <div class="setting-group">
-                <label>Particle Density Volume</label>
+                <label>Global Particle Generation Volume (Density)</label>
                 <input type="range" id="particle-count" min="2000" max="20000" value="9000" step="1000">
             </div>
 
             <div class="setting-group">
-                <label>Particle Physics Speed Base</label>
+                <label>Particle Core Kinetic Velocity Limit (Speed)</label>
                 <input type="range" id="particle-speed" min="0.1" max="5" value="1" step="0.1">
             </div>
 
             <div class="setting-group toggle-container">
-                <label>Acoustic Device Music Processing <span class="mic-badge">Mic Listening Node</span></label>
+                <label>Acoustic Processing Node <span class="mic-badge">Mic Sync</span></label>
                 <label class="switch">
                     <input type="checkbox" id="audio-toggle">
                     <span class="slider"></span>
@@ -533,31 +488,37 @@
             </div>
         </div>
 
-        <button id="close-btn" class="action-btn btn-gradient">Save & Close</button>
+        <button id="close-btn" class="action-btn btn-gradient">Commit Changes & Close</button>
     </div>
 
     <script>
-        // --- Core Application DOM Anchors ---
+        // --- Core Application Infrastructure Map ---
+        const lockScreen = document.getElementById('lock-screen');
+        const gatePassInput = document.getElementById('gate-pass-input');
+        const gateSubmitBtn = document.getElementById('gate-submit-btn');
+
         const logo = document.getElementById('logo');
         const mainTextEl = document.getElementById('main-text');
-        const passwordModal = document.getElementById('password-modal');
-        const passwordInput = document.getElementById('password-input');
-        const passwordSubmitBtn = document.getElementById('password-submit-btn');
+        const subTextEl = document.getElementById('sub-text');
         const settingsModal = document.getElementById('settings-modal');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const closeBtn = document.getElementById('close-btn');
         
-        // Settings System Targets
+        // Input Controls Anchor Nodes
         const inputMainText = document.getElementById('input-main-text');
+        const selectMainFont = document.getElementById('select-main-font');
         const inputSubText = document.getElementById('input-sub-text');
+        const selectSubFont = document.getElementById('select-sub-font');
         const tintBoxToggle = document.getElementById('tint-box-toggle');
         const contentTintBox = document.getElementById('content-tint-box');
         
         const mainLogoSelect = document.getElementById('main-logo-select');
         const circleToggle = document.getElementById('circle-toggle');
+        const extendedCircleControls = document.getElementById('extended-circle-controls');
+        const circleFillToggle = document.getElementById('circle-fill-toggle');
         const logoCircleEl = document.getElementById('logo-circle');
-        const circleColorGroup = document.getElementById('circle-color-group');
         const inputCircleColor = document.getElementById('input-circle-color');
+        const inputCircleGlow = document.getElementById('input-circle-glow');
 
         const eventSlotIndex = document.getElementById('event-slot-index');
         const customLogoUpload = document.getElementById('custom-logo-upload');
@@ -568,6 +529,8 @@
         const customColorsContainer = document.getElementById('custom-colors');
         const color1 = document.getElementById('color1');
         const color2 = document.getElementById('color2');
+        const gradientSpeedSlider = document.getElementById('gradient-speed-slider');
+        const gradientBrightnessSlider = document.getElementById('gradient-brightness-slider');
         const root = document.documentElement;
 
         const particleStyleSelect = document.getElementById('particle-style-select');
@@ -576,52 +539,110 @@
         const particleSpeedSlider = document.getElementById('particle-speed');
         const audioToggle = document.getElementById('audio-toggle');
 
-        // --- Vault Security Verification Implementation ---
-        let clickCount = 0;
-        let clickTimer;
         const TARGET_PASSWORD = "Iere26";
 
+        // --- Core Verification Layer Processing ---
+        gateSubmitBtn.addEventListener('click', () => {
+            if (gatePassInput.value === TARGET_PASSWORD) {
+                lockScreen.classList.add('unlocked');
+            } else {
+                alert("Authorization Denied.");
+                gatePassInput.value = "";
+                gatePassInput.focus();
+            }
+        });
+        gatePassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateSubmitBtn.click(); });
+
+        // --- Triple Click Settings Panel Access Hook ---
+        let clickCount = 0;
+        let clickTimer;
         [logo, mainTextEl, document.getElementById('custom-logo-1'), document.getElementById('custom-logo-2'), document.getElementById('custom-logo-3')].forEach(element => {
             element.addEventListener('click', () => {
                 clickCount++;
-                if (clickCount === 1) {
-                    clickTimer = setTimeout(() => { clickCount = 0; }, 600);
-                }
+                if (clickCount === 1) clickTimer = setTimeout(() => { clickCount = 0; }, 600);
                 if (clickCount === 3) {
                     clearTimeout(clickTimer);
                     clickCount = 0;
-                    passwordInput.value = "";
-                    passwordModal.classList.add('active');
-                    passwordInput.focus();
+                    if(lockScreen.classList.contains('unlocked')) {
+                        settingsModal.classList.add('active');
+                    }
                 }
             });
         });
 
-        passwordSubmitBtn.addEventListener('click', () => {
-            if (passwordInput.value === TARGET_PASSWORD) {
-                passwordModal.classList.remove('active');
-                settingsModal.classList.add('active');
-            } else {
-                alert("Invalid Security Password.");
-                passwordInput.value = "";
-                passwordInput.focus();
+        closeBtn.addEventListener('click', () => { settingsModal.classList.remove('active'); });
+
+        // --- Memory Synchronization Logic Matrix (LocalStorage) ---
+        const memoryBlueprint = {
+            mainText: { el: inputMainText, type: 'val', default: 'PREMIUM VISUALS' },
+            mainFont: { el: selectMainFont, type: 'val', default: "'Inter', sans-serif" },
+            subText: { el: inputSubText, type: 'val', default: 'Triple-click the logo for settings' },
+            subFont: { el: selectSubFont, type: 'val', default: "'Inter', sans-serif" },
+            tintBox: { el: tintBoxToggle, type: 'chk', default: false },
+            mainLogo: { el: mainLogoSelect, type: 'val', default: 'iere-logo.png' },
+            circleEnabled: { el: circleToggle, type: 'chk', default: false },
+            circleFilled: { el: circleFillToggle, type: 'chk', default: false },
+            circleColor: { el: inputCircleColor, type: 'val', default: '#ffffff' },
+            circleGlow: { el: inputCircleGlow, type: 'val', default: '0' },
+            gradientType: { el: gradientTypeSelect, type: 'val', default: 'linear' },
+            gradientPalette: { el: gradientSelect, type: 'val', default: '#ff5e62, #ff9966, #ffb347, #ffcc33' },
+            customColor1: { el: color1, type: 'val', default: '#ff5e62' },
+            customColor2: { el: color2, type: 'val', default: '#ff9966' },
+            gradientSpeed: { el: gradientSpeedSlider, type: 'val', default: '15' },
+            gradientBrightness: { el: gradientBrightnessSlider, type: 'val', default: '100' },
+            particleStyle: { el: particleStyleSelect, type: 'val', default: 'dust' },
+            particleEnabled: { el: particleToggle, type: 'chk', default: true },
+            particleCount: { el: particleCountSlider, type: 'val', default: '9000' },
+            particleSpeed: { el: particleSpeedSlider, type: 'val', default: '1' },
+            audioReactive: { el: audioToggle, type: 'chk', default: false }
+        };
+
+        function commitMemory() {
+            const dataDump = {};
+            for (const key in memoryBlueprint) {
+                const node = memoryBlueprint[key];
+                dataDump[key] = node.type === 'chk' ? node.el.checked : node.el.value;
             }
-        });
+            // Preserve Event Images Slots as DataURLs safely inside memory block
+            dataDump.imgSlot1 = document.getElementById('custom-logo-1').src || "";
+            dataDump.imgSlot2 = document.getElementById('custom-logo-2').src || "";
+            dataDump.imgSlot3 = document.getElementById('custom-logo-3').src || "";
+            localStorage.setItem('iere_screensaver_vault', JSON.stringify(dataDump));
+        }
 
-        passwordInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') passwordSubmitBtn.click();
-        });
+        function restoreMemory() {
+            const cache = localStorage.getItem('iere_screensaver_vault');
+            if (!cache) { executeUIEngineRefresh(); return; }
+            try {
+                const parsed = JSON.parse(cache);
+                for (const key in memoryBlueprint) {
+                    if (parsed[key] !== undefined) {
+                        const node = memoryBlueprint[key];
+                        if (node.type === 'chk') {
+                            node.el.checked = parsed[key];
+                        } else {
+                            node.el.value = parsed[key];
+                        }
+                    }
+                }
+                // Rehydrate Slot Images
+                if (parsed.imgSlot1) { const i1 = document.getElementById('custom-logo-1'); i1.src = parsed.imgSlot1; i1.style.display = 'block'; }
+                if (parsed.imgSlot2) { const i2 = document.getElementById('custom-logo-2'); i2.src = parsed.imgSlot2; i2.style.display = 'block'; }
+                if (parsed.imgSlot3) { const i3 = document.getElementById('custom-logo-3'); i3.src = parsed.imgSlot3; i3.style.display = 'block'; }
+            } catch (err) { console.error("Memory Restore Corrupted:", err); }
+            executeUIEngineRefresh();
+        }
 
-        closeBtn.addEventListener('click', () => {
-            settingsModal.classList.remove('active');
-        });
+        // --- Live Application Event Routing Array ---
+        function executeUIEngineRefresh() {
+            // Text values updates
+            mainTextEl.textContent = inputMainText.value;
+            document.getElementById('sub-text').textContent = inputSubText.value;
+            root.style.setProperty('--main-font', selectMainFont.value);
+            root.style.setProperty('--sub-font', selectSubFont.value);
 
-        // --- UI Structural Event Mapping ---
-        inputMainText.addEventListener('input', (e) => mainTextEl.textContent = e.target.value);
-        inputSubText.addEventListener('input', (e) => document.getElementById('sub-text').textContent = e.target.value);
-
-        tintBoxToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
+            // Contrast plate styling assignments
+            if (tintBoxToggle.checked) {
                 contentTintBox.style.background = "rgba(0, 0, 0, 0.45)";
                 contentTintBox.style.backdropFilter = "blur(15px)";
                 contentTintBox.style.webkitBackdropFilter = "blur(15px)";
@@ -632,32 +653,65 @@
                 contentTintBox.style.webkitBackdropFilter = "blur(0px)";
                 contentTintBox.style.border = "none";
             }
-        });
 
-        mainLogoSelect.addEventListener('change', (e) => {
-            if (e.target.value === 'hidden') {
+            // Core logo toggle
+            if (mainLogoSelect.value === 'hidden') {
                 logo.style.display = 'none';
             } else {
-                logo.src = e.target.value;
+                logo.src = mainLogoSelect.value;
                 logo.style.display = 'block';
             }
-        });
 
-        circleToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
+            // Halo Corona logic map
+            if (circleToggle.checked) {
                 logoCircleEl.style.display = 'block';
-                circleColorGroup.style.display = 'flex';
+                extendedCircleControls.style.display = 'flex';
             } else {
                 logoCircleEl.style.display = 'none';
-                circleColorGroup.style.display = 'none';
+                extendedCircleControls.style.display = 'none';
             }
-        });
+            
+            root.style.setProperty('--circle-color', inputCircleColor.value);
+            root.style.setProperty('--circle-bg', circleFillToggle.checked ? inputCircleColor.value : 'rgba(0,0,0,0)');
+            root.style.setProperty('--circle-glow', `${inputCircleGlow.value}px`);
 
-        inputCircleColor.addEventListener('input', (e) => {
-            root.style.setProperty('--circle-color', e.target.value);
-        });
+            // Background dynamic matrix mapping
+            root.style.setProperty('--gradient-speed', `${gradientSpeedSlider.value}s`);
+            root.style.setProperty('--bg-brightness', `${gradientBrightnessSlider.value}%`);
+            
+            customColorsContainer.classList.toggle('active', gradientSelect.value === 'custom');
+            
+            let colors = gradientSelect.value;
+            if (colors === 'custom') {
+                colors = `${color1.value}, ${color2.value}, ${color1.value}, ${color2.value}`;
+            }
+            const gradString = gradientTypeSelect.value === 'linear' 
+                ? `linear-gradient(-45deg, ${colors})` 
+                : `radial-gradient(circle at center, ${colors})`;
+            root.style.setProperty('--bg-gradient', gradString);
 
-        // --- Multi Event Logo Data Bus ---
+            // Particle engine global properties sync
+            particlesEnabled = particleToggle.checked;
+            currentParticleStyle = particleStyleSelect.value;
+            
+            const maxVal = 20000; const minVal = 2000;
+            densityDivider = maxVal - parseInt(particleCountSlider.value) + minVal;
+            baseSpeedMultiplier = parseFloat(particleSpeedSlider.value);
+        }
+
+        // Attach state change list processors across entire panel elements mapping
+        const interactiveInputs = [
+            inputMainText, selectMainFont, inputSubText, selectSubFont, tintBoxToggle,
+            mainLogoSelect, circleToggle, circleFillToggle, inputCircleColor, inputCircleGlow,
+            gradientTypeSelect, gradientSelect, color1, color2, gradientSpeedSlider, gradientBrightnessSlider,
+            particleStyleSelect, particleToggle, particleSpeedSlider
+        ];
+        interactiveInputs.forEach(el => el.addEventListener('input', () => { executeUIEngineRefresh(); commitMemory(); }));
+        interactiveInputs.forEach(el => el.addEventListener('change', () => { executeUIEngineRefresh(); commitMemory(); }));
+
+        particleCountSlider.addEventListener('change', () => { executeUIEngineRefresh(); initParticles(); commitMemory(); });
+
+        // --- Multi Logo Uploader Processing Router ---
         customLogoUpload.addEventListener('change', (e) => {
             const slot = eventSlotIndex.value;
             const file = e.target.files[0];
@@ -667,6 +721,7 @@
                     const targetImg = document.getElementById(`custom-logo-${slot}`);
                     targetImg.src = event.target.result;
                     targetImg.style.display = 'block';
+                    commitMemory();
                 };
                 reader.readAsDataURL(file);
             }
@@ -678,45 +733,19 @@
             targetImg.src = "";
             targetImg.style.display = 'none';
             customLogoUpload.value = "";
+            commitMemory();
         });
 
-        // --- Dynamic Ambient Color Render Matrix ---
-        let currentColors = gradientSelect.value;
-        let currentType = gradientTypeSelect.value;
-
-        const updateGradient = () => {
-            let colors = currentColors;
-            if (colors === 'custom') {
-                colors = `${color1.value}, ${color2.value}, ${color1.value}, ${color2.value}`;
-            }
-            const gradString = currentType === 'linear' 
-                ? `linear-gradient(-45deg, ${colors})` 
-                : `radial-gradient(circle at center, ${colors})`;
-            
-            root.style.setProperty('--bg-gradient', gradString);
-        };
-
-        gradientTypeSelect.addEventListener('change', (e) => { currentType = e.target.value; updateGradient(); });
-        gradientSelect.addEventListener('change', (e) => {
-            currentColors = e.target.value;
-            customColorsContainer.classList.toggle('active', currentColors === 'custom');
-            updateGradient();
-        });
-        color1.addEventListener('input', updateGradient);
-        color2.addEventListener('input', updateGradient);
-
-        // --- Presentation Window Layer Manager ---
+        // --- Screen Aspect Window Management ---
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error entering fullscreen: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => console.log(`Fullscreen error: ${err.message}`));
             } else {
                 document.exitFullscreen();
             }
         });
 
-        // --- Acoustic Processing Node Architecture ---
+        // --- Audio Context Data Capturing Engine ---
         let audioContext, analyser, dataArray;
         let isAudioSetup = false;
 
@@ -736,7 +765,7 @@
                 isAudioSetup = true;
                 return true;
             } catch (err) {
-                console.error("Audio Processing Setup Failed", err);
+                console.error("Mic Context Linking Failed", err);
                 alert("Microphone capture link access is required for real-time reactivity rendering.");
                 return false;
             }
@@ -747,16 +776,17 @@
                 const success = await setupAudio();
                 if (!success) e.target.checked = false;
             }
+            commitMemory();
         });
 
-        // --- Advanced Micro-Particle Engine ---
+        // --- Dynamic Fluid Canvas Core System ---
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
         
         let particlesArray = [];
         let particlesEnabled = true;
-        let densityDivider = parseInt(particleCountSlider.value);
-        let baseSpeedMultiplier = parseFloat(particleSpeedSlider.value);
+        let densityDivider = 9000;
+        let baseSpeedMultiplier = 1;
         let currentParticleStyle = 'dust';
 
         canvas.width = window.innerWidth;
@@ -769,65 +799,92 @@
         });
 
         class Particle {
-            constructor() {
-                this.reset(true);
-            }
+            constructor() { this.reset(true); }
             
             reset(initialStart = false) {
                 this.x = Math.random() * canvas.width;
-                // If initializing spread randomly, otherwise spawn near bottom for fire style simulation
-                if (initialStart || currentParticleStyle !== 'fire') {
+                
+                if (initialStart || (currentParticleStyle !== 'fire' && currentParticleStyle !== 'actual-fire')) {
                     this.y = Math.random() * canvas.height;
                 } else {
+                    // Ignite from lower screen floor margins
                     this.y = canvas.height + (Math.random() * 40);
                 }
                 
-                this.baseSize = Math.random() * 3 + 1;
-                this.size = this.baseSize;
-                
-                if (currentParticleStyle === 'fire') {
+                if (currentParticleStyle === 'actual-fire') {
+                    this.baseSize = Math.random() * 18 + 8; // Volumetric thermal profile
+                    this.baseSpeedX = Math.random() * 1.4 - 0.7;
+                    this.baseSpeedY = Math.random() * -2.5 - 1.5; // High lift draft velocity
+                    this.opacity = 1.0;
+                    this.life = 1.0; // Decay rate container
+                    this.decay = Math.random() * 0.015 + 0.008;
+                } else if (currentParticleStyle === 'fire') {
+                    this.baseSize = Math.random() * 3 + 1;
                     this.baseSpeedX = Math.random() * 1.6 - 0.8;
-                    this.baseSpeedY = Math.random() * -2 - 1.5; // Rises naturally faster
+                    this.baseSpeedY = Math.random() * -2 - 1.5;
                     this.opacity = Math.random() * 0.7 + 0.3;
-                    // Fire colors spectrum mapping array
-                    const fireColors = ['rgba(255, 94, 98, ', 'rgba(255, 153, 102, ', 'rgba(255, 204, 51, ', 'rgba(255, 240, 200, '];
-                    this.colorPrefix = fireColors[Math.floor(Math.random() * fireColors.length)];
                 } else {
+                    this.baseSize = Math.random() * 3 + 1;
                     this.baseSpeedX = Math.random() * 1 - 0.5;
                     this.baseSpeedY = Math.random() * -1 - 0.5;
                     this.opacity = Math.random() * 0.5 + 0.1;
-                    this.colorPrefix = 'rgba(255, 255, 255, ';
                 }
+                this.size = this.baseSize;
             }
 
             update(audioLevel) {
                 let currentSpeed = baseSpeedMultiplier;
                 if (audioToggle.checked && isAudioSetup) {
-                    currentSpeed += (audioLevel / 35);
-                    this.size = this.baseSize + (audioLevel / 10);
-                } else {
-                    this.size = this.baseSize;
+                    currentSpeed += (audioLevel / 30);
                 }
 
-                this.x += this.baseSpeedX * currentSpeed;
-                this.y += this.baseSpeedY * currentSpeed;
-                
-                if (currentParticleStyle === 'fire') {
-                    this.opacity -= 0.003; // Burn out as it floats up
-                    if (this.y < -10 || this.opacity <= 0 || this.x < 0 || this.x > canvas.width) {
+                if (currentParticleStyle === 'actual-fire') {
+                    this.x += (this.baseSpeedX * currentSpeed) + (Math.sin(this.y / 20) * 0.4); // Turbulent crosswind wave vectors
+                    this.y += this.baseSpeedY * currentSpeed;
+                    this.life -= this.decay;
+                    this.size = this.baseSize * this.life;
+                    this.opacity = this.life;
+
+                    if (this.y < -20 || this.life <= 0 || this.x < 0 || this.x > canvas.width) {
                         this.reset(false);
                     }
                 } else {
-                    // Standard system boundary calculations wrap-around loop logic
-                    if (this.y < 0) this.y = canvas.height;
-                    if (this.y > canvas.height) this.y = 0;
-                    if (this.x < 0) this.x = canvas.width;
-                    if (this.x > canvas.width) this.x = 0;
+                    this.x += this.baseSpeedX * currentSpeed;
+                    this.y += this.baseSpeedY * currentSpeed;
+                    
+                    if (audioToggle.checked && isAudioSetup) {
+                        this.size = this.baseSize + (audioLevel / 10);
+                    } else {
+                        this.size = this.baseSize;
+                    }
+
+                    if (currentParticleStyle === 'fire') {
+                        this.opacity -= 0.0025;
+                        if (this.y < -10 || this.opacity <= 0) this.reset(false);
+                    } else {
+                        if (this.y < 0) this.y = canvas.height;
+                        if (this.y > canvas.height) this.y = 0;
+                        if (this.x < 0) this.x = canvas.width;
+                        if (this.x > canvas.width) this.x = 0;
+                    }
                 }
             }
 
             draw() {
-                ctx.fillStyle = `${this.colorPrefix}${this.opacity})`;
+                if (currentParticleStyle === 'actual-fire') {
+                    // High quality composite flame chemical heat thermal gradient transition rendering
+                    let r = 255;
+                    let g = Math.floor(200 * (this.life * 1.2));
+                    let b = Math.floor(50 * (this.life * this.life));
+                    if (g > 255) g = 255; if (g < 0) g = 0;
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+                } else if (currentParticleStyle === 'fire') {
+                    const fireColors = ['rgba(255, 94, 98, ', 'rgba(255, 153, 102, ', 'rgba(255, 204, 51, '];
+                    ctx.fillStyle = `${fireColors[Math.floor(this.baseSize * 10) % fireColors.length]}${this.opacity})`;
+                } else {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                }
+                
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -837,12 +894,16 @@
         function initParticles() {
             particlesArray = [];
             let numberOfParticles = (canvas.width * canvas.height) / densityDivider;
+            // Cap to avoid thread thrashing during heavy processing frames
+            if (numberOfParticles > 600) numberOfParticles = 600; 
             for (let i = 0; i < numberOfParticles; i++) {
                 particlesArray.push(new Particle());
             }
         }
 
         function animateParticles() {
+            // Apply composite blending rules for standard fire overlays context acceleration
+            ctx.globalCompositeOperation = (currentParticleStyle === 'actual-fire') ? 'screen' : 'source-over';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             let currentAudioLevel = 0;
@@ -862,24 +923,8 @@
             requestAnimationFrame(animateParticles);
         }
 
-        particleToggle.addEventListener('change', (e) => particlesEnabled = e.target.checked);
-        particleStyleSelect.addEventListener('change', (e) => {
-            currentParticleStyle = e.target.value;
-            initParticles();
-        });
-        
-        particleCountSlider.addEventListener('change', (e) => {
-            const maxVal = 20000;
-            const minVal = 2000;
-            densityDivider = maxVal - e.target.value + minVal; 
-            initParticles();
-        });
-
-        particleSpeedSlider.addEventListener('input', (e) => {
-            baseSpeedMultiplier = parseFloat(e.target.value);
-        });
-
-        // Initialize Core Engines
+        // Initialize Runtime Pipeline
+        restoreMemory();
         initParticles();
         animateParticles();
     </script>
