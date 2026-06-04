@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iere Screensaver</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            /* Default Cinematic Gradient */
+            --bg-gradient: linear-gradient(-45deg, #ff5e62, #ff9966, #ffb347, #ffcc33);
+            --text-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        /* Live Gradient Background */
+        #gradient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            z-index: 1;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Particle Canvas */
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Main Content Overlay */
+        #content-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #main-text {
+            font-size: 3rem;
+            font-weight: 300;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        #sub-text {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--text-color);
+            margin-top: 20px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        #logo {
+            max-width: 300px;
+            width: 20vw;
+            min-width: 150px;
+            cursor: pointer;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #logo:hover {
+            transform: scale(1.05);
+        }
+
+        #logo:active {
+            transform: scale(0.95);
+        }
+
+        /* Fullscreen Button */
+        #fullscreen-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        /* Settings Modal (Glassmorphism) */
+        #settings-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 400px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        #settings-modal.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .settings-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting-group label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        input[type="text"]:focus, select:focus {
+            border-color: #ffb347;
+        }
+
+        option {
+            background: #222;
+            color: white;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Custom Checkbox */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #ff9966;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        #close-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #ff9966, #ff5e62);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+
+        #close-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Color Picker row for Custom Gradient */
+        .color-pickers {
+            display: flex;
+            gap: 10px;
+            display: none;
+        }
+        .color-pickers.active {
+            display: flex;
+        }
+        .color-pickers input[type="color"] {
+            border: none;
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            background: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gradient-bg"></div>
+    <canvas id="particles-canvas"></canvas>
+
+    <div id="content-layer">
+        <div id="main-text">PREMIUM VISUALS</div>
+        <img src="iere-logo.png" id="logo" alt="Main Logo">
+        <div id="sub-text">Triple-click the logo for settings</div>
+    </div>
+
+    <button id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+
+    <div id="settings-modal">
+        <div class="settings-header">Display Settings</div>
+        
+        <div class="setting-group">
+            <label>Main Headline Text</label>
+            <input type="text" id="input-main-text" value="PREMIUM VISUALS">
+        </div>
+
+        <div class="setting-group">
+            <label>Sub-Headline Text</label>
+            <input type="text" id="input-sub-text" value="Triple-click the logo for settings">
+        </div>
+
+        <div class="setting-group">
+            <label>Cinematic Gradient</label>
+            <select id="gradient-select">
+                <option value="linear-gradient(-45deg, #ff5e62, #ff9966, #ffb347, #ffcc33)">Bocas Sunset (Warm)</option>
+                <option value="linear-gradient(-45deg, #00c6ff, #0072ff, #1cb5e0, #000046)">Maracas Deep (Ocean)</option>
+                <option value="linear-gradient(-45deg, #8A2387, #E94057, #F27121)">Scarlet Ibis (Vibrant)</option>
+                <option value="linear-gradient(-45deg, #232526, #414345, #0f2027, #203a43)">Pitch Midnight (Dark)</option>
+                <option value="custom">Custom Colors...</option>
+            </select>
+        </div>
+
+        <div class="setting-group color-pickers" id="custom-colors">
+            <input type="color" id="color1" value="#ff5e62">
+            <input type="color" id="color2" value="#ff9966">
+        </div>
+
+        <div class="setting-group toggle-container">
+            <label>Live Particles</label>
+            <label class="switch">
+                <input type="checkbox" id="particle-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button id="close-btn">Save & Close</button>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const logo = document.getElementById('logo');
+        const settingsModal = document.getElementById('settings-modal');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const closeBtn = document.getElementById('close-btn');
+        
+        // Text Elements
+        const mainTextEl = document.getElementById('main-text');
+        const subTextEl = document.getElementById('sub-text');
+        const inputMainText = document.getElementById('input-main-text');
+        const inputSubText = document.getElementById('input-sub-text');
+        
+        // Background Elements
+        const gradientSelect = document.getElementById('gradient-select');
+        const customColorsContainer = document.getElementById('custom-colors');
+        const color1 = document.getElementById('color1');
+        const color2 = document.getElementById('color2');
+        const root = document.documentElement;
+
+        // --- Triple Click Logic ---
+        let clickCount = 0;
+        let clickTimer;
+
+        logo.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount === 1) {
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                }, 600); // 600ms window for triple click
+            }
+            if (clickCount === 3) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                settingsModal.classList.add('active');
+            }
+        });
+
+        // --- Settings Logic ---
+        closeBtn.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+        });
+
+        // Update Text Live
+        inputMainText.addEventListener('input', (e) => {
+            mainTextEl.textContent = e.target.value;
+        });
+        inputSubText.addEventListener('input', (e) => {
+            subTextEl.textContent = e.target.value;
+        });
+
+        // Update Gradients Live
+        const updateCustomGradient = () => {
+            const grad = `linear-gradient(-45deg, ${color1.value}, ${color2.value}, ${color1.value}, ${color2.value})`;
+            root.style.setProperty('--bg-gradient', grad);
+        };
+
+        gradientSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                customColorsContainer.classList.add('active');
+                updateCustomGradient();
+            } else {
+                customColorsContainer.classList.remove('active');
+                root.style.setProperty('--bg-gradient', e.target.value);
+            }
+        });
+
+        color1.addEventListener('input', updateCustomGradient);
+        color2.addEventListener('input', updateCustomGradient);
+
+        // --- Fullscreen Logic ---
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // --- Particle Engine ---
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        const particleToggle = document.getElementById('particle-toggle');
+        
+        let particlesArray = [];
+        let particlesEnabled = true;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * -1 - 0.5; // Flow upwards naturally
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                // Wrap around edges
+                if (this.y < 0) this.y = canvas.height;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (particlesEnabled) {
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        particleToggle.addEventListener('change', (e) => {
+            particlesEnabled = e.target.checked;
+        });
+
+        initParticles();
+        animateParticles();
+
+    </script>
+</body>
+</html>
