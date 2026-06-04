@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iere Screensaver</title>
+    <title>Iere Screensaver Pro</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
@@ -11,6 +11,7 @@
             /* Default Cinematic Gradient */
             --bg-gradient: linear-gradient(-45deg, #ff5e62, #ff9966, #ffb347, #ffcc33);
             --text-color: #ffffff;
+            --circle-color: #ffffff;
         }
 
         * {
@@ -73,6 +74,21 @@
             text-align: center;
         }
 
+        /* Optional Backdrop Tint Panel */
+        #content-tint-box {
+            padding: 40px 60px;
+            border-radius: 24px;
+            background: rgba(0, 0, 0, 0); /* Managed dynamically via JS */
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 90vw;
+        }
+
         #main-text {
             font-size: 3rem;
             font-weight: 300;
@@ -81,50 +97,63 @@
             letter-spacing: 4px;
             text-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
-            cursor: pointer; /* Added as fallback trigger */
+            cursor: pointer;
         }
 
         #sub-text {
             font-size: 1.2rem;
             font-weight: 300;
             color: var(--text-color);
-            margin-top: 20px;
+            margin-top: 30px;
             letter-spacing: 2px;
             opacity: 0.8;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         #logo-container {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 30px;
+            padding: 20px;
         }
 
-        #logo, #custom-logo {
-            max-width: 300px;
-            width: 20vw;
-            min-width: 150px;
+        /* Decorative Logo Circle Accent */
+        #logo-circle {
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            border: 2px solid var(--circle-color);
+            border-radius: 50%;
+            display: none;
+            pointer-events: none;
+            filter: drop-shadow(0 0 15px var(--circle-color));
+            transition: all 0.3s ease;
+            z-index: 0;
+        }
+
+        #logo, .event-logo-slot {
+            max-width: 260px;
+            width: 18vw;
+            min-width: 130px;
             cursor: pointer;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
         }
 
-        #custom-logo {
-            display: none; /* Hidden until uploaded */
-            max-height: 200px;
+        .event-logo-slot {
+            display: none;
+            max-height: 180px;
             width: auto;
         }
 
-        #logo:hover, #custom-logo:hover {
+        #logo:hover, .event-logo-slot:hover {
             transform: scale(1.05);
         }
 
-        #logo:active, #custom-logo:active {
-            transform: scale(0.95);
-        }
-
-        /* Fullscreen Button */
+        /* Fullscreen Auto-hide Integration */
         #fullscreen-btn {
             position: absolute;
             bottom: 30px;
@@ -150,17 +179,49 @@
             transform: scale(1.1);
         }
 
-        /* Settings Modal (Glassmorphism) */
+        /* Completely hide full screen control button when system environment is in full screen mode */
+        :fullscreen #fullscreen-btn { display: none !important; }
+        :-webkit-full-screen #fullscreen-btn { display: none !important; }
+
+        /* Security Verification Screen */
+        #password-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 360px;
+            background: rgba(25, 25, 25, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            z-index: 101;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        #password-modal.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Settings Master Panel */
         #settings-modal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            width: 450px;
-            max-height: 85vh; /* Allow scrolling if too tall */
+            width: 460px;
+            max-height: 85vh;
             display: flex;
             flex-direction: column;
-            background: rgba(20, 20, 20, 0.6);
+            background: rgba(20, 20, 20, 0.65);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -195,18 +256,9 @@
             margin-bottom: 15px;
         }
 
-        /* Custom Scrollbar for Settings */
-        .settings-scroll-area::-webkit-scrollbar {
-            width: 6px;
-        }
-        .settings-scroll-area::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-        .settings-scroll-area::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-        }
+        .settings-scroll-area::-webkit-scrollbar { width: 6px; }
+        .settings-scroll-area::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .settings-scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
         .setting-group {
             margin-bottom: 20px;
@@ -220,7 +272,7 @@
             color: #aaa;
         }
 
-        input[type="text"], input[type="file"], select {
+        input[type="text"], input[type="password"], select {
             width: 100%;
             padding: 10px;
             background: rgba(0,0,0,0.3);
@@ -231,13 +283,8 @@
             outline: none;
         }
         
-        input[type="file"] {
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        input[type="text"]:focus, select:focus {
-            border-color: #ffb347;
+        input[type="text"]:focus, input[type="password"]:focus, select:focus {
+            border-color: #ff9966;
         }
 
         input[type="range"] {
@@ -246,10 +293,7 @@
             cursor: pointer;
         }
 
-        option {
-            background: #222;
-            color: white;
-        }
+        option { background: #222; color: white; }
 
         .toggle-container {
             display: flex;
@@ -258,7 +302,6 @@
             flex-direction: row;
         }
 
-        /* Custom Checkbox */
         .switch {
             position: relative;
             display: inline-block;
@@ -266,19 +309,12 @@
             height: 24px;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0,0,0,0.5);
             transition: .4s;
             border-radius: 34px;
@@ -288,68 +324,42 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 3px;
+            height: 16px; width: 16px; left: 4px; bottom: 3px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
         }
 
-        input:checked + .slider {
-            background-color: #ff9966;
-        }
+        input:checked + .slider { background-color: #ff9966; }
+        input:checked + .slider:before { transform: translateX(24px); }
 
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        #close-btn {
+        .action-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(90deg, #ff9966, #ff5e62);
             border: none;
             border-radius: 8px;
             color: white;
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            flex-shrink: 0;
             transition: opacity 0.3s;
         }
 
-        #close-btn:hover {
-            opacity: 0.9;
-        }
+        .btn-gradient { background: linear-gradient(90deg, #ff9966, #ff5e62); }
+        .btn-danger { background: rgba(233, 64, 87, 0.3); border: 1px solid rgba(233, 64, 87, 0.5); margin-top: 5px;}
+        .action-btn:hover { opacity: 0.9; }
 
-        /* Color Picker row for Custom Gradient */
-        .color-pickers {
-            display: flex;
-            gap: 10px;
-            display: none;
-        }
-        .color-pickers.active {
-            display: flex;
-        }
+        .color-pickers { display: none; gap: 10px; }
+        .color-pickers.active { display: flex; }
         .color-pickers input[type="color"] {
-            border: none;
-            width: 100%;
-            height: 40px;
-            border-radius: 8px;
-            background: none;
-            cursor: pointer;
+            border: none; width: 100%; height: 40px; border-radius: 8px; background: none; cursor: pointer;
         }
 
         .mic-badge {
-            font-size: 0.7rem;
-            background: #ff5e62;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 10px;
-            color: white;
-            vertical-align: middle;
+            font-size: 0.7rem; background: #ff5e62; padding: 2px 6px; border-radius: 4px; margin-left: 10px; color: white;
         }
+        
+        .row-flex { display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
@@ -358,21 +368,37 @@
     <canvas id="particles-canvas"></canvas>
 
     <div id="content-layer">
-        <div id="main-text">PREMIUM VISUALS</div>
-        <div id="logo-container">
-            <img src="iere-logo.png" id="logo" alt="Main Logo">
-            <img id="custom-logo" alt="Event Logo">
+        <div id="content-tint-box">
+            <div id="main-text">PREMIUM VISUALS</div>
+            <div id="logo-container">
+                <div id="logo-circle"></div>
+                <img src="iere-logo.png" id="logo" alt="Main Logo">
+                <img id="custom-logo-1" class="event-logo-slot" alt="Event Logo 1">
+                <img id="custom-logo-2" class="event-logo-slot" alt="Event Logo 2">
+                <img id="custom-logo-3" class="event-logo-slot" alt="Event Logo 3">
+            </div>
+            <div id="sub-text">Triple-click the logo for settings</div>
         </div>
-        <div id="sub-text">Triple-click the logo for settings</div>
     </div>
 
     <button id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
 
-    <!-- Settings Panel -->
+    <!-- Password Prompt -->
+    <div id="password-modal">
+        <div class="settings-header">Security Access</div>
+        <div class="setting-group">
+            <label>Enter Password to Open Panel</label>
+            <input type="password" id="password-input" placeholder="••••••••">
+        </div>
+        <button id="password-submit-btn" class="action-btn btn-gradient">Verify</button>
+    </div>
+
+    <!-- Master Settings Panel -->
     <div id="settings-modal">
-        <div class="settings-header">Visual Settings</div>
+        <div class="settings-header">System Settings</div>
         
         <div class="settings-scroll-area">
+            <!-- Text Modules -->
             <div class="setting-group">
                 <label>Main Headline Text</label>
                 <input type="text" id="input-main-text" value="PREMIUM VISUALS">
@@ -383,39 +409,84 @@
                 <input type="text" id="input-sub-text" value="Triple-click the logo for settings">
             </div>
 
-            <!-- Logo Controls -->
             <div class="setting-group toggle-container">
-                <label>Show Iere Logo</label>
+                <label>Contrast Tint Plate Behind Text & Logos</label>
                 <label class="switch">
-                    <input type="checkbox" id="logo-toggle" checked>
+                    <input type="checkbox" id="tint-box-toggle">
                     <span class="slider"></span>
                 </label>
             </div>
 
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+            <!-- Core Asset Management -->
             <div class="setting-group">
-                <label>Upload Event Logo</label>
-                <input type="file" id="custom-logo-upload" accept="image/*">
+                <label>Primary Main Logo Image Source</label>
+                <select id="main-logo-select">
+                    <option value="iere-logo.png">Original (iere-logo.png)</option>
+                    <option value="iere-logo1.png">Logo 1 (iere-logo1.png)</option>
+                    <option value="iere-logo2.png">Logo 2 (iere-logo2.png)</option>
+                    <option value="iere-logo3.png">Logo 3 (iere-logo3.png)</option>
+                    <option value="iere-logo4.png">Logo 4 (iere-logo4.png)</option>
+                    <option value="iere-logo5.png">Logo 5 (iere-logo5.png)</option>
+                    <option value="hidden">Hidden / Removed</option>
+                </select>
+            </div>
+
+            <!-- Logo Ring Accent Controls -->
+            <div class="setting-group toggle-container">
+                <label>Enable Ambient Circle Ring Accent</label>
+                <label class="switch">
+                    <input type="checkbox" id="circle-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-group" id="circle-color-group" style="display: none;">
+                <label>Circle Aura Color</label>
+                <input type="color" id="input-circle-color" value="#ffffff" style="width:100%; height:40px; border-radius:8px; border:none; background:none; cursor:pointer;">
+            </div>
+
+            <!-- Enhanced Multi Event Logo Modules -->
+            <div class="setting-group" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.15);">
+                <label style="font-weight: 600; color: #fff;">Event Logo Managers (Max 3)</label>
+                <div style="margin-top: 10px; display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <label>Target Placement Slot</label>
+                        <select id="event-slot-index">
+                            <option value="1">Event Slot 1</option>
+                            <option value="2">Event Slot 2</option>
+                            <option value="3">Event Slot 3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Upload Image File</label>
+                        <input type="file" id="custom-logo-upload" accept="image/*" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
+                    </div>
+                    <button id="remove-event-logo-btn" class="action-btn btn-danger">Remove Selected Logo</button>
+                </div>
             </div>
 
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
 
-            <!-- Background Controls -->
+            <!-- Background Profiles -->
             <div class="setting-group">
-                <label>Gradient Direction</label>
+                <label>Gradient Layout Type</label>
                 <select id="gradient-type-select">
-                    <option value="linear">Linear (Sweeping)</option>
-                    <option value="radial">Radial (Pulsing Center)</option>
+                    <option value="linear">Linear Sweep (Classic)</option>
+                    <option value="radial">Radial Hub (Pulsing Ambient Center)</option>
                 </select>
             </div>
 
             <div class="setting-group">
-                <label>Cinematic Gradient</label>
+                <label>Cinematic Color Palette</label>
                 <select id="gradient-select">
                     <option value="#ff5e62, #ff9966, #ffb347, #ffcc33">Bocas Sunset (Warm)</option>
                     <option value="#00c6ff, #0072ff, #1cb5e0, #000046">Maracas Deep (Ocean)</option>
                     <option value="#8A2387, #E94057, #F27121">Scarlet Ibis (Vibrant)</option>
+                    <option value="#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3">Trinidad Carnival Rainbow</option>
                     <option value="#232526, #414345, #0f2027, #203a43">Pitch Midnight (Dark)</option>
-                    <option value="custom">Custom Colors...</option>
+                    <option value="custom">Custom Configuration...</option>
                 </select>
             </div>
 
@@ -426,9 +497,17 @@
 
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
 
-            <!-- Particle Controls -->
+            <!-- Advanced System Particles -->
+            <div class="setting-group">
+                <label>Particle Engine System Style</label>
+                <select id="particle-style-select">
+                    <option value="dust">Ethereal Ambient Space Dust</option>
+                    <option value="fire">Cinematic Rising Embers (Fire Style)</option>
+                </select>
+            </div>
+
             <div class="setting-group toggle-container">
-                <label>Live Particles</label>
+                <label>Render Canvas Particles</label>
                 <label class="switch">
                     <input type="checkbox" id="particle-toggle" checked>
                     <span class="slider"></span>
@@ -436,18 +515,17 @@
             </div>
 
             <div class="setting-group">
-                <label>Particle Density</label>
+                <label>Particle Density Volume</label>
                 <input type="range" id="particle-count" min="2000" max="20000" value="9000" step="1000">
             </div>
 
             <div class="setting-group">
-                <label>Particle Base Speed</label>
+                <label>Particle Physics Speed Base</label>
                 <input type="range" id="particle-speed" min="0.1" max="5" value="1" step="0.1">
             </div>
 
-            <!-- Audio Reactivity -->
             <div class="setting-group toggle-container">
-                <label>Audio Reactive <span class="mic-badge">Mic Required</span></label>
+                <label>Acoustic Device Music Processing <span class="mic-badge">Mic Listening Node</span></label>
                 <label class="switch">
                     <input type="checkbox" id="audio-toggle">
                     <span class="slider"></span>
@@ -455,23 +533,36 @@
             </div>
         </div>
 
-        <button id="close-btn">Save & Close</button>
+        <button id="close-btn" class="action-btn btn-gradient">Save & Close</button>
     </div>
 
     <script>
-        // --- DOM Elements ---
+        // --- Core Application DOM Anchors ---
         const logo = document.getElementById('logo');
-        const customLogo = document.getElementById('custom-logo');
         const mainTextEl = document.getElementById('main-text');
+        const passwordModal = document.getElementById('password-modal');
+        const passwordInput = document.getElementById('password-input');
+        const passwordSubmitBtn = document.getElementById('password-submit-btn');
         const settingsModal = document.getElementById('settings-modal');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const closeBtn = document.getElementById('close-btn');
         
-        // Settings Inputs
+        // Settings System Targets
         const inputMainText = document.getElementById('input-main-text');
         const inputSubText = document.getElementById('input-sub-text');
-        const logoToggle = document.getElementById('logo-toggle');
+        const tintBoxToggle = document.getElementById('tint-box-toggle');
+        const contentTintBox = document.getElementById('content-tint-box');
+        
+        const mainLogoSelect = document.getElementById('main-logo-select');
+        const circleToggle = document.getElementById('circle-toggle');
+        const logoCircleEl = document.getElementById('logo-circle');
+        const circleColorGroup = document.getElementById('circle-color-group');
+        const inputCircleColor = document.getElementById('input-circle-color');
+
+        const eventSlotIndex = document.getElementById('event-slot-index');
         const customLogoUpload = document.getElementById('custom-logo-upload');
+        const removeEventLogoBtn = document.getElementById('remove-event-logo-btn');
+
         const gradientTypeSelect = document.getElementById('gradient-type-select');
         const gradientSelect = document.getElementById('gradient-select');
         const customColorsContainer = document.getElementById('custom-colors');
@@ -479,59 +570,117 @@
         const color2 = document.getElementById('color2');
         const root = document.documentElement;
 
-        // Particle Inputs
+        const particleStyleSelect = document.getElementById('particle-style-select');
         const particleToggle = document.getElementById('particle-toggle');
         const particleCountSlider = document.getElementById('particle-count');
         const particleSpeedSlider = document.getElementById('particle-speed');
         const audioToggle = document.getElementById('audio-toggle');
 
-        // --- Triple Click Logic ---
+        // --- Vault Security Verification Implementation ---
         let clickCount = 0;
         let clickTimer;
+        const TARGET_PASSWORD = "Iere26";
 
-        // Apply triple click to the logo, custom logo, AND the main text (as a fallback if logos are hidden)
-        [logo, customLogo, mainTextEl].forEach(element => {
+        [logo, mainTextEl, document.getElementById('custom-logo-1'), document.getElementById('custom-logo-2'), document.getElementById('custom-logo-3')].forEach(element => {
             element.addEventListener('click', () => {
                 clickCount++;
                 if (clickCount === 1) {
-                    clickTimer = setTimeout(() => {
-                        clickCount = 0;
-                    }, 600); // 600ms window for triple click
+                    clickTimer = setTimeout(() => { clickCount = 0; }, 600);
                 }
                 if (clickCount === 3) {
                     clearTimeout(clickTimer);
                     clickCount = 0;
-                    settingsModal.classList.add('active');
+                    passwordInput.value = "";
+                    passwordModal.classList.add('active');
+                    passwordInput.focus();
                 }
             });
         });
 
-        // --- Settings Logic ---
+        passwordSubmitBtn.addEventListener('click', () => {
+            if (passwordInput.value === TARGET_PASSWORD) {
+                passwordModal.classList.remove('active');
+                settingsModal.classList.add('active');
+            } else {
+                alert("Invalid Security Password.");
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+        });
+
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') passwordSubmitBtn.click();
+        });
+
         closeBtn.addEventListener('click', () => {
             settingsModal.classList.remove('active');
         });
 
-        // Text & Logo Live Updates
+        // --- UI Structural Event Mapping ---
         inputMainText.addEventListener('input', (e) => mainTextEl.textContent = e.target.value);
         inputSubText.addEventListener('input', (e) => document.getElementById('sub-text').textContent = e.target.value);
 
-        logoToggle.addEventListener('change', (e) => {
-            logo.style.display = e.target.checked ? 'block' : 'none';
+        tintBoxToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                contentTintBox.style.background = "rgba(0, 0, 0, 0.45)";
+                contentTintBox.style.backdropFilter = "blur(15px)";
+                contentTintBox.style.webkitBackdropFilter = "blur(15px)";
+                contentTintBox.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+            } else {
+                contentTintBox.style.background = "rgba(0, 0, 0, 0)";
+                contentTintBox.style.backdropFilter = "blur(0px)";
+                contentTintBox.style.webkitBackdropFilter = "blur(0px)";
+                contentTintBox.style.border = "none";
+            }
         });
 
+        mainLogoSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'hidden') {
+                logo.style.display = 'none';
+            } else {
+                logo.src = e.target.value;
+                logo.style.display = 'block';
+            }
+        });
+
+        circleToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                logoCircleEl.style.display = 'block';
+                circleColorGroup.style.display = 'flex';
+            } else {
+                logoCircleEl.style.display = 'none';
+                circleColorGroup.style.display = 'none';
+            }
+        });
+
+        inputCircleColor.addEventListener('input', (e) => {
+            root.style.setProperty('--circle-color', e.target.value);
+        });
+
+        // --- Multi Event Logo Data Bus ---
         customLogoUpload.addEventListener('change', (e) => {
+            const slot = eventSlotIndex.value;
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    customLogo.src = event.target.result;
-                    customLogo.style.display = 'block';
+                    const targetImg = document.getElementById(`custom-logo-${slot}`);
+                    targetImg.src = event.target.result;
+                    targetImg.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Background Gradient Logic
+        removeEventLogoBtn.addEventListener('click', () => {
+            const slot = eventSlotIndex.value;
+            const targetImg = document.getElementById(`custom-logo-${slot}`);
+            targetImg.src = "";
+            targetImg.style.display = 'none';
+            customLogoUpload.value = "";
+        });
+
+        // --- Dynamic Ambient Color Render Matrix ---
         let currentColors = gradientSelect.value;
         let currentType = gradientTypeSelect.value;
 
@@ -547,36 +696,27 @@
             root.style.setProperty('--bg-gradient', gradString);
         };
 
-        gradientTypeSelect.addEventListener('change', (e) => {
-            currentType = e.target.value;
-            updateGradient();
-        });
-
+        gradientTypeSelect.addEventListener('change', (e) => { currentType = e.target.value; updateGradient(); });
         gradientSelect.addEventListener('change', (e) => {
             currentColors = e.target.value;
-            if (currentColors === 'custom') {
-                customColorsContainer.classList.add('active');
-            } else {
-                customColorsContainer.classList.remove('active');
-            }
+            customColorsContainer.classList.toggle('active', currentColors === 'custom');
             updateGradient();
         });
-
         color1.addEventListener('input', updateGradient);
         color2.addEventListener('input', updateGradient);
 
-        // --- Fullscreen Logic ---
+        // --- Presentation Window Layer Manager ---
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error: ${err.message}`);
+                    console.log(`Error entering fullscreen: ${err.message}`);
                 });
             } else {
                 document.exitFullscreen();
             }
         });
 
-        // --- Audio Reactivity Setup ---
+        // --- Acoustic Processing Node Architecture ---
         let audioContext, analyser, dataArray;
         let isAudioSetup = false;
 
@@ -592,13 +732,12 @@
                 const source = audioContext.createMediaStreamSource(stream);
                 source.connect(analyser);
                 analyser.fftSize = 256;
-                const bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
                 isAudioSetup = true;
                 return true;
             } catch (err) {
-                console.error("Mic access denied or unavailable", err);
-                alert("Microphone access is required for audio reactivity.");
+                console.error("Audio Processing Setup Failed", err);
+                alert("Microphone capture link access is required for real-time reactivity rendering.");
                 return false;
             }
         }
@@ -610,7 +749,7 @@
             }
         });
 
-        // --- Particle Engine ---
+        // --- Advanced Micro-Particle Engine ---
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
         
@@ -618,6 +757,7 @@
         let particlesEnabled = true;
         let densityDivider = parseInt(particleCountSlider.value);
         let baseSpeedMultiplier = parseFloat(particleSpeedSlider.value);
+        let currentParticleStyle = 'dust';
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -630,20 +770,41 @@
 
         class Particle {
             constructor() {
+                this.reset(true);
+            }
+            
+            reset(initialStart = false) {
                 this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
+                // If initializing spread randomly, otherwise spawn near bottom for fire style simulation
+                if (initialStart || currentParticleStyle !== 'fire') {
+                    this.y = Math.random() * canvas.height;
+                } else {
+                    this.y = canvas.height + (Math.random() * 40);
+                }
+                
                 this.baseSize = Math.random() * 3 + 1;
                 this.size = this.baseSize;
-                this.baseSpeedX = Math.random() * 1 - 0.5;
-                this.baseSpeedY = Math.random() * -1 - 0.5;
-                this.opacity = Math.random() * 0.5 + 0.1;
+                
+                if (currentParticleStyle === 'fire') {
+                    this.baseSpeedX = Math.random() * 1.6 - 0.8;
+                    this.baseSpeedY = Math.random() * -2 - 1.5; // Rises naturally faster
+                    this.opacity = Math.random() * 0.7 + 0.3;
+                    // Fire colors spectrum mapping array
+                    const fireColors = ['rgba(255, 94, 98, ', 'rgba(255, 153, 102, ', 'rgba(255, 204, 51, ', 'rgba(255, 240, 200, '];
+                    this.colorPrefix = fireColors[Math.floor(Math.random() * fireColors.length)];
+                } else {
+                    this.baseSpeedX = Math.random() * 1 - 0.5;
+                    this.baseSpeedY = Math.random() * -1 - 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.1;
+                    this.colorPrefix = 'rgba(255, 255, 255, ';
+                }
             }
+
             update(audioLevel) {
-                // Calculate dynamic speed and size based on settings and audio
                 let currentSpeed = baseSpeedMultiplier;
                 if (audioToggle.checked && isAudioSetup) {
-                    currentSpeed += (audioLevel / 50); // Boost speed with audio
-                    this.size = this.baseSize + (audioLevel / 15); // Pulse size with audio
+                    currentSpeed += (audioLevel / 35);
+                    this.size = this.baseSize + (audioLevel / 10);
                 } else {
                     this.size = this.baseSize;
                 }
@@ -651,14 +812,22 @@
                 this.x += this.baseSpeedX * currentSpeed;
                 this.y += this.baseSpeedY * currentSpeed;
                 
-                // Wrap around edges
-                if (this.y < 0) this.y = canvas.height;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.x > canvas.width) this.x = 0;
+                if (currentParticleStyle === 'fire') {
+                    this.opacity -= 0.003; // Burn out as it floats up
+                    if (this.y < -10 || this.opacity <= 0 || this.x < 0 || this.x > canvas.width) {
+                        this.reset(false);
+                    }
+                } else {
+                    // Standard system boundary calculations wrap-around loop logic
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                }
             }
+
             draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fillStyle = `${this.colorPrefix}${this.opacity})`;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -676,14 +845,11 @@
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Get Audio Data once per frame if active
             let currentAudioLevel = 0;
             if (audioToggle.checked && isAudioSetup && dataArray) {
                 analyser.getByteFrequencyData(dataArray);
                 let sum = 0;
-                for(let i = 0; i < dataArray.length; i++) {
-                    sum += dataArray[i];
-                }
+                for(let i = 0; i < dataArray.length; i++) sum += dataArray[i];
                 currentAudioLevel = sum / dataArray.length;
             }
 
@@ -696,11 +862,13 @@
             requestAnimationFrame(animateParticles);
         }
 
-        // Particle Settings Listeners
         particleToggle.addEventListener('change', (e) => particlesEnabled = e.target.checked);
+        particleStyleSelect.addEventListener('change', (e) => {
+            currentParticleStyle = e.target.value;
+            initParticles();
+        });
         
         particleCountSlider.addEventListener('change', (e) => {
-            // Reverse the logic so higher slider value = more particles (smaller divider)
             const maxVal = 20000;
             const minVal = 2000;
             densityDivider = maxVal - e.target.value + minVal; 
@@ -711,9 +879,9 @@
             baseSpeedMultiplier = parseFloat(e.target.value);
         });
 
+        // Initialize Core Engines
         initParticles();
         animateParticles();
-
     </script>
 </body>
 </html>
