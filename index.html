@@ -4,40 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>oAvs // Production Workspace</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@800;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
         /* --- DYNAMIC GRADIENT ENGINE PRESETS --- */
         body.preset-cyber {
             --gradient-start: #00ffcc;
             --gradient-mid: #0066ff;
             --gradient-end: #7000ff;
-            --accent-glow: rgba(0, 255, 204, 0.3);
+            --accent-glow: rgba(0, 255, 204, 0.25);
         }
         body.preset-sunset {
             --gradient-start: #ff3366;
             --gradient-mid: #ff6600;
             --gradient-end: #ffcc00;
-            --accent-glow: rgba(255, 51, 102, 0.3);
+            --accent-glow: rgba(255, 51, 102, 0.25);
         }
         body.preset-toxic {
             --gradient-start: #adff2f;
             --gradient-mid: #00ff88;
             --gradient-end: #00a8ff;
-            --accent-glow: rgba(0, 255, 136, 0.3);
+            --accent-glow: rgba(0, 255, 136, 0.25);
         }
         body.preset-vamp {
             --gradient-start: #ff0055;
             --gradient-mid: #4d00ff;
             --gradient-end: #0b0b12;
-            --accent-glow: rgba(255, 0, 85, 0.3);
+            --accent-glow: rgba(255, 0, 85, 0.25);
         }
 
         :root {
-            --bg-dark: #06060a;
-            --panel-bg: rgba(10, 10, 14, 0.80);
+            --bg-dark: #050508;
+            --panel-bg: rgba(8, 8, 12, 0.82);
             --text-pure: #ffffff;
-            --text-muted: #71717a;
-            --industrial-grid: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            --border-spec: 1px solid rgba(255, 255, 255, 0.08);
+            --text-muted: #6f6f76;
+            --industrial-grid: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            --border-spec: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         * {
@@ -50,312 +55,340 @@
             background-color: var(--bg-dark);
             background-image: var(--industrial-grid);
             background-size: 24px 24px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
             color: var(--text-pure);
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
             display: flex;
-            transition: background 0.5s ease;
+            position: relative;
         }
 
-        /* --- SHARED GRADIENT ANIMATION KEYFRAME --- */
+        /* --- SYNCHRONIZED GRADIENT MOTOR ANIMATION --- */
         @keyframes dynamicGradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* --- INDUSTRIAL ACCENTS --- */
+        /* ENVIRONMENTAL AMBIENT BLEND LAYER */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 50%;
+            height: 60%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        /* --- GEOMETRIC / INDUSTRIAL TECH ACCENTS --- */
         .geo-marker {
             position: absolute;
             font-size: 10px;
-            font-family: monospace;
-            color: rgba(255, 255, 255, 0.15);
+            font-family: 'JetBrains Mono', monospace;
+            color: rgba(255, 255, 255, 0.18);
             pointer-events: none;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.25em;
             z-index: 5;
         }
-        .marker-tr { top: 20px; right: 20px; }
+        .marker-tr { top: 24px; right: 24px; }
+        .marker-bl { bottom: 24px; left: 384px; }
 
-        /* --- LEFT-ALIGNED ADMIN CORE SIDEBAR --- */
+        /* --- FIXED LEFT-ALIGNED ADMIN CORE SIDEBAR --- */
         .admin-sidebar {
             width: 360px;
             height: 100vh;
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border-right: var(--border-spec);
-            padding: 40px 30px;
+            padding: 45px 32px;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 32px;
             z-index: 10;
             position: relative;
+            flex-shrink: 0;
         }
 
         /* --- THE BLENDED LOGO COMPONENT --- */
         .logo-container {
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 10px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .brand-logo {
-            font-size: 38px;
+            font-family: 'Syne', sans-serif;
+            font-size: 46px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            /* Gradient Mask Blend Setup */
-            background: linear-gradient(-45deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+            letter-spacing: -0.02em;
+            line-height: 1;
+            /* Advanced Linear Blend Masking */
+            background: linear-gradient(-45deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end), var(--gradient-start));
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: dynamicGradientShift 12s ease infinite;
-            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
+            animation: dynamicGradientShift 10s ease infinite;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
             display: inline-block;
         }
 
         .panel-title {
-            font-size: 11px;
-            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.2em;
             color: var(--text-muted);
-            margin-top: -5px;
+            margin-top: 6px;
         }
 
-        /* --- CONTROLS & TYPOGRAPHY STYLING --- */
+        /* --- FORM CONTROL PACKAGING --- */
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .control-label {
+            font-family: 'JetBrains Mono', monospace;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
             color: var(--text-muted);
         }
 
         .video-url-input, .preset-dropdown {
             width: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             border: var(--border-spec);
-            padding: 12px 14px;
-            border-radius: 4px;
+            padding: 14px 16px;
+            border-radius: 6px;
             color: var(--text-pure);
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             outline: none;
         }
 
         .video-url-input:focus, .preset-dropdown:focus {
             border-color: var(--gradient-start);
-            box-shadow: 0 0 12px var(--accent-glow);
+            box-shadow: 0 0 16px var(--accent-glow);
+            background: rgba(0, 0, 0, 0.8);
         }
 
         .preset-dropdown option {
-            background: #121218;
+            background: #0d0d12;
             color: var(--text-pure);
+            padding: 10px;
         }
 
+        /* IMPACTFUL CTA BUTTON WITH SYNCHRONIZED GLOW */
         .action-btn {
-            background: linear-gradient(-45deg, var(--gradient-start), var(--gradient-mid));
+            background: linear-gradient(-45deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
             background-size: 200% 200%;
             color: #ffffff;
             border: none;
-            padding: 14px;
-            font-size: 11px;
+            padding: 15px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            border-radius: 4px;
+            letter-spacing: 0.15em;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            animation: dynamicGradientShift 10s ease infinite;
         }
 
         .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 20px var(--accent-glow);
-            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+            filter: brightness(1.1);
         }
 
-        /* --- MAIN VIEWPORT CANVAS (RIGHT AREA) --- */
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* --- UNBLOCKED MAIN VIEWPORT CANVAS (RIGHT INTERFACE) --- */
         .display-canvas {
-            flex-grow: 1;
+            width: calc(100vw - 360px);
             height: 100vh;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #000000;
+            overflow: hidden;
+            flex-grow: 1;
         }
 
+        /* Bulletproof background video configuration */
         .main-loop-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 1;
+            z-index: 2;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
-        /* --- SOCIAL PROOF INTEGRATION BLOCK --- */
+        /* --- FLOATING SOCIAL PROOF METRICS OVERLAY --- */
         .social-proof-panel {
             position: absolute;
             top: 40px;
             right: 40px;
-            background: rgba(8, 8, 12, 0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(6, 6, 9, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: var(--border-spec);
-            padding: 20px 25px;
-            border-radius: 6px;
+            padding: 22px 28px;
+            border-radius: 8px;
             display: flex;
-            gap: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            gap: 36px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.65);
             z-index: 5;
         }
 
         .stat-block {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .stat-val {
-            font-family: "Courier New", Courier, monospace;
-            font-size: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 26px;
             font-weight: 700;
             color: #ffffff;
             display: flex;
             align-items: center;
+            line-height: 1;
         }
 
         .stat-lbl {
+            font-family: 'Inter', sans-serif;
             font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .live-dot {
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background: #ff3366;
             border-radius: 50%;
-            margin-right: 8px;
-            animation: pulseGlow 1.5s infinite ease-in-out;
+            margin-right: 10px;
+            animation: pulseGlow 1.6s infinite ease-in-out;
         }
 
         @keyframes pulseGlow {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px #ff3366; }
-            100% { transform: scale(0.9); opacity: 0.6; }
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.25); opacity: 1; box-shadow: 0 0 10px #ff3366; }
+            100% { transform: scale(0.9); opacity: 0.5; }
         }
 
         .matrix-info {
             font-size: 11px;
             color: var(--text-muted);
-            font-family: monospace;
-            line-height: 1.7;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.8;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 15px;
+            padding-top: 18px;
         }
     </style>
 </head>
 <body class="preset-cyber">
 
     <div class="geo-marker marker-tr">SYS_REF // MATRIX_v2.8</div>
+    <div class="geo-marker marker-bl">COORD_X // 10.6368° N</div>
 
-    <!-- LEFT ADMIN INTERFACE -->
     <div class="admin-sidebar">
         
-        <!-- BLENDED BRAND LOGO ZONE -->
         <div class="logo-container">
             <div class="brand-logo" id="logoTarget">oAvs</div>
-            <div class="panel-title">Workspace Core</div>
+            <div class="panel-title">Production Interface</div>
         </div>
         
-        <!-- VIDEO URL ACCELERATOR INPUT -->
         <div class="control-group">
             <label class="control-label" for="videoSourceInput">Video Asset URL / Path</label>
-            <input type="text" id="videoSourceInput" class="video-url-input" placeholder="Paste .mp4 pipeline link...">
+            <input type="text" id="videoSourceInput" class="video-url-input" placeholder="Paste path or URL to .mp4 stream...">
             <button onclick="updateLoopVideo()" class="action-btn">Update Video Feed</button>
         </div>
 
-        <!-- ENGINE GRADIENT PRESETS SELECTOR -->
         <div class="control-group">
-            <label class="control-label" for="gradientPresetSelector">Gradient Movement Profile</label>
+            <label class="control-label" for="gradientPresetSelector">Gradient Profile Profile</label>
             <select id="gradientPresetSelector" class="preset-dropdown" onchange="changeEnginePreset(this.value)">
-                <option value="preset-cyber">CYBER CYAN // ACTIVATE</option>
-                <option value="preset-sunset">SUNSET HORIZON // TOKYO</option>
-                <option value="preset-toxic">TOXIC MATRIX // SLICK</option>
-                <option value="preset-vamp">DARK MATTER // EMPIRE</option>
+                <option value="preset-cyber">CYBER CYAN // ENGINE_ON</option>
+                <option value="preset-sunset">SUNSET HORIZON // CARIBBEAN</option>
+                <option value="preset-toxic">TOXIC MATRIX // ENHANCED</option>
+                <option value="preset-vamp">DARK MATTER // MIDNIGHT</option>
             </select>
         </div>
 
-        <!-- TECHNICAL RUNTIME METRICS BELOW FOLD -->
         <div class="control-group" style="margin-top: auto;">
             <div class="control-label" style="margin-bottom: 2px;">System Framework</div>
             <div class="matrix-info">
-                ORIENTATION: LEFT_LOCKED<br>
-                BLEND MODULE: CLIPPED_TRANS<br>
-                RENDER SCALE: UNBLOCKED_CANVAS
+                LAYOUT: LEFT_UNBLOCKED<br>
+                STREAM PIPELINE: DIRECT_NODE<br>
+                BLEND MODE: VECTOR_SYNC
             </div>
         </div>
     </div>
 
-    <!-- MAIN INTERACTIVE CANVAS -->
     <div class="display-canvas">
         
-        <!-- VIDEO REPLAY PIPELINE -->
-        <video id="loopTarget" class="main-loop-video" autoplay loop muted playsinline>
-            <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+        <video id="loopTarget" class="main-loop-video" autoplay loop muted playsinline src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4">
         </video>
 
-        <!-- LIVE SOCIAL PROOF MATRIX OVERLAY -->
         <div class="social-proof-panel">
             <div class="stat-block">
                 <div class="stat-val"><span class="live-dot"></span>14.2K</div>
                 <div class="stat-lbl">Live Viewers</div>
             </div>
-            <div class="stat-block" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 25px;">
-                <div class="stat-val" style="color: #ffffff;" id="retentionVal">89.4%</div>
+            <div class="stat-block" style="border-left: 1px solid rgba(255,255,255,0.12); padding-left: 28px;">
+                <div class="stat-val" style="color: #00ffcc;" id="retentionVal">89.4%</div>
                 <div class="stat-lbl">Avg Retention</div>
             </div>
         </div>
 
     </div>
 
-    <!-- CODE CONTROLLERS -->
     <script>
-        // Hot-swapping looping video files instantly without crashing layout vectors
+        // Execution pipeline to change loop video source seamlessly without refreshing the frame
         function updateLoopVideo() {
             const inputField = document.getElementById('videoSourceInput');
             const videoElement = document.getElementById('loopTarget');
             
-            if (inputField.value.trim() !== "") {
-                videoElement.src = inputField.value.trim();
+            const targetedURL = inputField.value.trim();
+            if (targetedURL !== "") {
+                // Instantly updating parent node directly avoids source map lockup
+                videoElement.src = targetedURL;
                 videoElement.load();
-                videoElement.play().catch(error => {
-                    console.log("Autoplay safety interception logged:", error);
+                videoElement.play().catch(err => {
+                    console.log("Stream media playback engine catch executed:", err);
                 });
             }
         }
 
-        // Swapping active moving gradient presets globally to update panel accents & logo maps simultaneously
+        // Updates profile engine classes dynamically on body element to switch synchronized vectors
         function changeEnginePreset(selectedPreset) {
-            // Wipe standard presets from body node
-            document.body.classList.remove('preset-cyber', 'preset-sunset', 'preset-toxic', 'preset-vamp');
+            document.body.className = selectedPreset;
             
-            // Inject new target parameters
-            document.body.classList.add(selectedPreset);
-            
-            // Adjust retention analytics visualization accent subtly based on style
+            // Adjust retention label numbers to synchronize aesthetic with preset choice
             const retentionMetric = document.getElementById('retentionVal');
             if(selectedPreset === 'preset-sunset') {
                 retentionMetric.style.color = '#ff6600';
