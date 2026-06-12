@@ -1,6 +1,10 @@
-Here is the complete, cohesive, and production-ready `index.html` file.
+Ah, I see exactly what happened here! The conversational introduction text from my previous response ("*Here is the complete, cohesive, and production-ready...*") accidentally got copied directly into your file right above the code.
 
-This version locks down the left-aligned configuration, maintains all your underlying looping mechanics, and introduces an advanced **Gradient Engine**. The preset system updates a global CSS variable array dynamically. This allows the background environment and the **oAvs typography logo** to share the exact same moving coordinate matrix, seamlessly blending the animated gradients directly through the brand lettering using advanced text-clipping masks.
+Because the workspace uses a layout engine (`display: flex;`), that raw text is being treated as a solid object. It's taking up the entire left side of the screen and shoving your **Admin Box completely over to the right**, breaking the alignment.
+
+To fix this, you just need to delete that paragraph of text from the very top of your file so it starts directly with `<!DOCTYPE html>`.
+
+Here is the completely clean, pure code file with no extra text blocks around it so you can copy and drop it straight in:
 
 ```html
 <!DOCTYPE html>
@@ -276,23 +280,19 @@ This version locks down the left-aligned configuration, maintains all your under
 
     <div class="geo-marker marker-tr">SYS_REF // MATRIX_v2.8</div>
 
-    <!-- LEFT ADMIN INTERFACE -->
     <div class="admin-sidebar">
         
-        <!-- BLENDED BRAND LOGO ZONE -->
         <div class="logo-container">
             <div class="brand-logo" id="logoTarget">oAvs</div>
             <div class="panel-title">Workspace Core</div>
         </div>
         
-        <!-- VIDEO URL ACCELERATOR INPUT -->
         <div class="control-group">
             <label class="control-label" for="videoSourceInput">Video Asset URL / Path</label>
             <input type="text" id="videoSourceInput" class="video-url-input" placeholder="Paste .mp4 pipeline link...">
             <button onclick="updateLoopVideo()" class="action-btn">Update Video Feed</button>
         </div>
 
-        <!-- ENGINE GRADIENT PRESETS SELECTOR -->
         <div class="control-group">
             <label class="control-label" for="gradientPresetSelector">Gradient Movement Profile</label>
             <select id="gradientPresetSelector" class="preset-dropdown" onchange="changeEnginePreset(this.value)">
@@ -303,7 +303,6 @@ This version locks down the left-aligned configuration, maintains all your under
             </select>
         </div>
 
-        <!-- TECHNICAL RUNTIME METRICS BELOW FOLD -->
         <div class="control-group" style="margin-top: auto;">
             <div class="control-label" style="margin-bottom: 2px;">System Framework</div>
             <div class="matrix-info">
@@ -314,15 +313,12 @@ This version locks down the left-aligned configuration, maintains all your under
         </div>
     </div>
 
-    <!-- MAIN INTERACTIVE CANVAS -->
     <div class="display-canvas">
         
-        <!-- VIDEO REPLAY PIPELINE -->
         <video id="loopTarget" class="main-loop-video" autoplay loop muted playsinline>
             <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
         </video>
 
-        <!-- LIVE SOCIAL PROOF MATRIX OVERLAY -->
         <div class="social-proof-panel">
             <div class="stat-block">
                 <div class="stat-val"><span class="live-dot"></span>14.2K</div>
@@ -336,7 +332,6 @@ This version locks down the left-aligned configuration, maintains all your under
 
     </div>
 
-    <!-- CODE CONTROLLERS -->
     <script>
         // Hot-swapping looping video files instantly without crashing layout vectors
         function updateLoopVideo() {
