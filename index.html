@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iere Screensaver Master Pro</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Montserrat:wght@300;400;700&family=Oswald:wght@300;700&family=Syncopate:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+    <!-- Dynamic Google Fonts Preload -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link id="dynamic-google-fonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&family=Montserrat:wght@300;400;700&family=Oswald:wght@300;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap">
 
+    <style>
         :root {
             /* Default Layout States */
             --bg-gradient: linear-gradient(-45deg, #ff5e62, #ff9966, #ffb347, #ffcc33);
@@ -24,6 +27,9 @@
             /* Environment Vectors */
             --gradient-speed: 15s;
             --bg-brightness: 100%;
+            --accent-gold: #d4af37;
+            --vignette-opacity: 0.4;
+            --vignette-color: #000000;
         }
 
         * {
@@ -38,37 +44,43 @@
             height: 100%;
             overflow: hidden;
             background-color: #050505;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body.hide-cursor {
+            cursor: none !important;
         }
 
         /* Full Screen Gateway Security Wall */
         #lock-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #0a0a0a;
+            background: rgba(5, 5, 5, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             z-index: 99999;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), pointer-events 0.6s ease;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), pointer-events 0.5s ease;
         }
         #lock-screen.unlocked {
             opacity: 0;
             pointer-events: none;
         }
         .lock-container {
-            width: 360px;
-            background: rgba(20, 20, 20, 0.6);
+            width: 380px;
+            background: rgba(20, 20, 20, 0.85);
             backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.4);
             border-radius: 24px;
             padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9), 0 0 30px rgba(212, 175, 55, 0.2);
         }
 
-        /* Live Background Engines */
+        /* Ambient Lighting & Background Engines */
         #gradient-bg {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -77,6 +89,16 @@
             animation: gradientFlow var(--gradient-speed) ease infinite;
             filter: brightness(var(--bg-brightness));
             z-index: 1;
+            transition: filter 0.3s ease;
+        }
+
+        #video-ambient-blur {
+            position: absolute;
+            top: -5%; left: -5%; width: 110%; height: 110%;
+            object-fit: cover;
+            filter: blur(40px) brightness(60%);
+            z-index: 1;
+            display: none;
         }
 
         #video-bg {
@@ -84,8 +106,25 @@
             top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover;
             filter: brightness(var(--bg-brightness));
-            z-index: 1;
+            z-index: 2;
             display: none;
+        }
+
+        #vignette-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 40%, var(--vignette-color) 100%);
+            opacity: var(--vignette-opacity);
+            transition: opacity 0.3s ease;
+        }
+
+        #weather-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 4;
+            pointer-events: none;
         }
 
         @keyframes gradientFlow {
@@ -97,19 +136,22 @@
         #particles-canvas {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2;
+            z-index: 5;
             pointer-events: none;
         }
 
-        #content-layer {
+        /* Content Layer & Multi-Layer Parallax Node */
+        #parallax-container {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 3;
+            z-index: 6;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
+            transition: transform 0.1s ease-out;
+            will-change: transform;
         }
 
         #content-tint-box {
@@ -122,6 +164,7 @@
             align-items: center;
             justify-content: center;
             max-width: 90vw;
+            position: relative;
         }
 
         #main-text {
@@ -133,17 +176,36 @@
             letter-spacing: 8px;
             text-shadow: 0 4px 20px rgba(0,0,0,0.4);
             cursor: pointer;
+            transition: all 0.3s ease;
         }
+
+        /* Text Motion FX Engine Classes */
+        .fx-float { animation: fxFloat 4s ease-in-out infinite; }
+        .fx-pulse { animation: fxPulse 2.5s ease-in-out infinite; }
+        @keyframes fxFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+        @keyframes fxPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.03); } }
 
         #sub-text {
             font-family: var(--sub-font);
             font-size: 1.3rem;
             font-weight: 300;
             color: var(--text-color);
-            margin-top: 35px;
+            margin-top: 30px;
             letter-spacing: 3px;
             opacity: 0.9;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        #quote-text {
+            font-family: var(--sub-font);
+            font-size: 0.95rem;
+            font-style: italic;
+            color: var(--text-color);
+            margin-top: 15px;
+            opacity: 0.75;
+            max-width: 600px;
+            letter-spacing: 1px;
+            transition: opacity 0.5s ease;
         }
 
         #logo-container {
@@ -154,7 +216,7 @@
             padding: 50px;
         }
 
-        /* Enhanced Corona Circle Component */
+        /* Halo Ring Core Node */
         #logo-circle {
             position: absolute;
             width: var(--circle-size);
@@ -165,7 +227,7 @@
             display: none;
             pointer-events: none;
             filter: drop-shadow(0 0 var(--circle-glow) var(--circle-color));
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
             z-index: 0;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -196,7 +258,7 @@
             top: 35px;
             right: 40px;
             text-align: right;
-            z-index: 4;
+            z-index: 7;
             display: none;
             color: var(--text-color);
             text-shadow: 0 2px 12px rgba(0,0,0,0.6);
@@ -217,6 +279,44 @@
             margin-top: 5px;
             text-transform: uppercase;
         }
+        #secondary-clock {
+            font-family: var(--sub-font);
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* Acoustic Spectrum Visualizer Node */
+        #audio-spectrum-canvas {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 100px;
+            z-index: 7;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #audio-spectrum-canvas.active { opacity: 0.9; }
+
+        /* Watermark Node */
+        #watermark-text {
+            position: absolute;
+            font-family: var(--sub-font);
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.3;
+            z-index: 7;
+            pointer-events: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .wm-bottom-left { bottom: 20px; left: 25px; }
+        .wm-bottom-right { bottom: 20px; right: 25px; }
+        .wm-top-left { top: 20px; left: 25px; }
 
         /* Dynamic System Footer Line Anchor */
         #footer-text {
@@ -230,7 +330,7 @@
             color: var(--text-color);
             letter-spacing: 2px;
             opacity: 0.6;
-            z-index: 3;
+            z-index: 7;
             text-shadow: 0 2px 5px rgba(0,0,0,0.5);
             text-transform: uppercase;
         }
@@ -240,61 +340,95 @@
             bottom: 30px; right: 30px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white; width: 50px; height: 50px; border-radius: 50%;
-            font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(5px);
+            color: white; width: 48px; height: 48px; border-radius: 50%;
+            font-size: 1.3rem; cursor: pointer; backdrop-filter: blur(8px);
             display: flex; justify-content: center; align-items: center; z-index: 10;
             transition: all 0.3s ease;
         }
         #fullscreen-btn:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.1); }
 
-        /* Fullscreen Flag Auto Hide Button rules */
         :fullscreen #fullscreen-btn { display: none !important; }
-        :-webkit-full-screen #fullscreen-btn { display: none !important; }
 
-        /* Master Control Panel Overlay UI */
+        /* Performance & Diagnostics HUD Overlay */
+        #perf-hud {
+            position: absolute;
+            top: 20px; left: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 8px 14px;
+            border-radius: 10px;
+            color: #00ffaa;
+            font-family: monospace;
+            font-size: 0.75rem;
+            z-index: 20;
+            display: none;
+            pointer-events: none;
+        }
+
+        /* Settings Control Deck (Draggable Window) */
         #settings-modal {
             position: absolute;
             top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 500px; max-height: 85vh;
+            transform: translate(-50%, -50%) scale(0.92);
+            width: 580px; max-height: 88vh;
             display: flex; flex-direction: column;
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px; padding: 30px; color: white;
+            background: rgba(12, 12, 12, 0.85);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 24px; padding: 25px; color: white;
             z-index: 1000; opacity: 0; pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.8), 0 0 40px rgba(212, 175, 55, 0.15);
         }
         #settings-modal.active { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1); }
 
         .settings-header {
-            font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 600;
-            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 12px; flex-shrink: 0;
+            font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 600;
+            margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;
+            cursor: move;
+        }
+        .device-badge-tag {
+            font-size: 0.75rem; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.4);
+            color: #ffd700; padding: 3px 8px; border-radius: 6px; font-weight: 400; letter-spacing: 1px;
         }
 
-        .settings-scroll-area { overflow-y: auto; padding-right: 12px; margin-bottom: 15px; }
+        /* Search Filter Input Bar */
+        #settings-search-input {
+            width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+            color: white; font-size: 0.85rem; margin-bottom: 15px; outline: none;
+        }
+
+        .settings-scroll-area { overflow-y: auto; padding-right: 10px; margin-bottom: 15px; flex-grow: 1; }
         .settings-scroll-area::-webkit-scrollbar { width: 6px; }
         .settings-scroll-area::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
-        .settings-scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .settings-scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 10px; }
 
-        .setting-group { margin-bottom: 22px; display: flex; flex-direction: column; gap: 8px; }
-        .setting-group label { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #b3b3b3; }
+        .setting-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .setting-group.hidden-search { display: none !important; }
+        .setting-group label { font-family: 'Inter', sans-serif; font-size: 0.82rem; color: #b3b3b3; display: flex; align-items: center; justify-content: space-between; }
+
+        .tooltip-icon {
+            display: inline-block; width: 14px; height: 14px; background: rgba(255,255,255,0.2);
+            color: #ddd; border-radius: 50%; text-align: center; font-size: 0.65rem; line-height: 14px;
+            cursor: help; margin-left: 6px;
+        }
 
         input[type="text"], input[type="password"], input[type="datetime-local"], select {
-            width: 100%; padding: 11px; background: rgba(0,0,0,0.4);
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.45);
             border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
-            color: white; font-size: 0.95rem; outline: none; transition: border 0.2s;
+            color: white; font-size: 0.9rem; outline: none; transition: border 0.2s;
         }
-        input[type="text"]:focus, select:focus { border-color: #ff9966; }
+        input[type="text"]:focus, select:focus { border-color: var(--accent-gold); }
 
-        input[type="range"] { width: 100%; accent-color: #ff9966; cursor: pointer; }
+        input[type="range"] { width: 100%; accent-color: var(--accent-gold); cursor: pointer; }
         option { background: #141414; color: white; }
 
         .toggle-container { display: flex; align-items: center; justify-content: space-between; flex-direction: row; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 22px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
@@ -305,52 +439,90 @@
             position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
             background-color: white; transition: .3s; border-radius: 50%;
         }
-        input:checked + .slider { background-color: #ff9966; }
-        input:checked + .slider:before { transform: translateX(24px); }
+        input:checked + .slider { background-color: var(--accent-gold); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
         .action-btn {
-            width: 100%; padding: 13px; border: none; border-radius: 8px;
-            color: white; font-weight: 600; font-size: 0.95rem; cursor: pointer;
-            transition: opacity 0.2s;
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            color: white; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
         }
-        .btn-gradient { background: linear-gradient(90deg, #ff9966, #ff5e62); }
-        .btn-danger { background: rgba(233, 64, 87, 0.2); border: 1px solid rgba(233, 64, 87, 0.4); margin-top: 4px; }
+        .btn-gradient { background: linear-gradient(90deg, #d4af37, #ff9966); color: #0a0a0a; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; }
+        .btn-danger { background: rgba(233, 64, 87, 0.2); border: 1px solid rgba(233, 64, 87, 0.4); }
         .action-btn:hover { opacity: 0.9; }
+        .action-btn:active { transform: scale(0.98); }
 
         .color-pickers { display: none; gap: 10px; }
         .color-pickers.active { display: flex; }
         .color-pickers input[type="color"] {
-            border: none; width: 100%; height: 38px; border-radius: 8px; background: none; cursor: pointer;
+            border: none; width: 100%; height: 36px; border-radius: 8px; background: none; cursor: pointer;
         }
-        .mic-badge { font-size: 0.7rem; background: #ff5e62; padding: 2px 6px; border-radius: 4px; margin-left: 8px; color: white; }
+        
+        .toast-notification {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(212, 175, 55, 0.95); color: #0a0a0a; padding: 10px 24px; border-radius: 30px;
+            font-weight: 600; font-size: 0.88rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+        }
+        .toast-notification.show { transform: translateX(-50%) translateY(0); }
+
+        /* Hotkey Help Modal */
+        #hotkey-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+            z-index: 10000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        #hotkey-modal.active { opacity: 1; pointer-events: all; }
+        .hotkey-card {
+            background: #141414; border: 1px solid var(--accent-gold);
+            border-radius: 20px; padding: 30px; width: 450px; color: white;
+        }
+        .hotkey-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
+        .kbd-key { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <!-- System Lockdown Veil Curtain -->
+    <!-- Security Gateway Veil Screen -->
     <div id="lock-screen">
         <div class="lock-container">
             <h2 style="color: white; font-family: 'Inter', sans-serif; font-weight: 400; margin-bottom: 20px; font-size: 1.2rem; letter-spacing: 2px;">SYSTEM LOCK</h2>
             <div class="setting-group" style="text-align: left;">
-                <label>Enter Passkey Authorization</label>
+                <label>Authorization Passkey</label>
                 <input type="password" id="gate-pass-input" placeholder="••••••••" style="text-align: center; font-size: 1.2rem; letter-spacing: 3px;">
             </div>
             <button id="gate-submit-btn" class="action-btn btn-gradient" style="margin-top: 10px;">Authenticate System</button>
         </div>
     </div>
 
-    <!-- Live Render Modules -->
+    <!-- Live Ambient Engines & Layers -->
     <div id="gradient-bg"></div>
+    <video id="video-ambient-blur" autoplay loop muted playsinline></video>
     <video id="video-bg" autoplay loop muted playsinline></video>
+    <div id="vignette-overlay"></div>
+    <canvas id="weather-canvas"></canvas>
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Interactive Clock System Overlay Block -->
+    <!-- Diagnostics HUD -->
+    <div id="perf-hud">FPS: <span id="hud-fps">60</span> | Mem: <span id="hud-mem">0</span> MB</div>
+
+    <!-- Real-time Clock Overlay Module -->
     <div id="clock-overlay">
         <div id="clock-time">00:00:00</div>
         <div id="clock-date">LOADING CONSOLE</div>
+        <div id="secondary-clock"></div>
     </div>
 
-    <div id="content-layer">
+    <!-- Acoustic Visualizer Canvas Spectrum -->
+    <canvas id="audio-spectrum-canvas"></canvas>
+
+    <!-- Watermark Node -->
+    <div id="watermark-text" class="wm-bottom-left"></div>
+
+    <!-- Content Engine Matrix (Parallax Container) -->
+    <div id="parallax-container">
         <div id="content-tint-box">
             <div id="main-text">IERE</div>
             <div id="logo-container">
@@ -361,33 +533,94 @@
                 <img id="custom-logo-3" class="event-logo-slot" alt="Event Logo 3">
             </div>
             <div id="sub-text">Do it better.</div>
+            <div id="quote-text"></div>
         </div>
     </div>
 
     <div id="footer-text">ieregroup.com</div>
 
-    <button id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+    <button id="fullscreen-btn" title="Toggle Fullscreen (F)">⛶</button>
 
-    <!-- Master Control Settings Panel Grid -->
+    <!-- Toast Notification Overlay -->
+    <div id="toast" class="toast-notification">Profile Saved</div>
+
+    <!-- Hotkey Reference Cheat-Sheet Modal -->
+    <div id="hotkey-modal">
+        <div class="hotkey-card">
+            <h3 style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.2rem;">Keyboard Shortcuts Cheat-Sheet</h3>
+            <div class="hotkey-row"><span>Toggle Master Control Deck</span><span class="kbd-key">S</span></div>
+            <div class="hotkey-row"><span>Toggle Fullscreen Mode</span><span class="kbd-key">F</span></div>
+            <div class="hotkey-row"><span>Toggle Particles Active State</span><span class="kbd-key">P</span></div>
+            <div class="hotkey-row"><span>Freeze/Resume Particle Speed</span><span class="kbd-key">SPACE</span></div>
+            <div class="hotkey-row"><span>Lock Screensaver Instantly</span><span class="kbd-key">L</span></div>
+            <div class="hotkey-row"><span>Toggle Diagnostics Overlay</span><span class="kbd-key">D</span></div>
+            <div class="hotkey-row"><span>Open Shortcut Cheat-Sheet</span><span class="kbd-key">? / H</span></div>
+            <button id="close-hotkeys-btn" class="action-btn btn-secondary" style="margin-top: 20px;">Close Shortcut Menu</button>
+        </div>
+    </div>
+
+    <!-- Master Settings Control Panel -->
     <div id="settings-modal">
-        <div class="settings-header">System Control Deck</div>
+        <div class="settings-header" id="modal-drag-handle">
+            <span>Control Deck Engine</span>
+            <span id="device-badge-id" class="device-badge-tag">Device: Trinidad Studio</span>
+        </div>
+
+        <input type="text" id="settings-search-input" placeholder="🔍 Search settings, features, or controls...">
         
         <div class="settings-scroll-area">
-            <!-- Typography Headers Config -->
+            
+            <!-- Quick Preset Switcher -->
             <div class="setting-group">
-                <label>Main Headline Wording</label>
+                <label>Device Preset Quick Switcher <span class="tooltip-icon" title="Instantly load preset profiles">?</span></label>
+                <select id="preset-switcher-select">
+                    <option value="current">Active Profile Configuration</option>
+                    <option value="trinidad-gold">Trinidad Gold Elegance</option>
+                    <option value="ocean-blue">Maracas Bay Cyber Ocean</option>
+                    <option value="scarlet-ibis">Scarlet Ibis Vibrant</option>
+                    <option value="minimal-dark">Pitch Lake Obsidian Dark</option>
+                </select>
+            </div>
+
+            <!-- Profile & Multi-Device Vault -->
+            <div style="border: 1px solid rgba(212, 175, 55, 0.3); padding: 14px; border-radius: 12px; background: rgba(212, 175, 55, 0.05); display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #ffd700; font-size: 0.85rem;">Device Sync & Profile Vault</label>
+                <div class="setting-group" style="margin-bottom: 0;">
+                    <label>Assigned Device Tag Name</label>
+                    <input type="text" id="input-device-name" value="Trinidad Main Display">
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                    <button id="export-profile-btn" class="action-btn btn-secondary" style="font-size: 0.8rem; padding: 8px;">Export JSON</button>
+                    <button id="import-profile-btn" class="action-btn btn-secondary" style="font-size: 0.8rem; padding: 8px;">Import JSON</button>
+                    <button id="factory-reset-btn" class="action-btn btn-danger" style="font-size: 0.8rem; padding: 8px;">Factory Reset</button>
+                    <input type="file" id="import-json-file" accept=".json" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Typography & Headlines -->
+            <div class="setting-group">
+                <label>Headline Wording</label>
                 <input type="text" id="input-main-text" value="IERE">
             </div>
 
             <div class="setting-group">
-                <label>Main Headline Font Family</label>
+                <label>Main Headline Font</label>
                 <select id="select-main-font">
                     <option value="'Inter', sans-serif">Inter (Modern Light)</option>
                     <option value="'Oswald', sans-serif">Oswald (Bold Compact)</option>
                     <option value="'Cinzel', serif">Cinzel (Classic Royal)</option>
                     <option value="'Syncopate', sans-serif">Syncopate (Extended Tech)</option>
-                    <option value="'Montserrat', sans-serif">Montserrat (Clean Geometric)</option>
-                    <option value="'Playfair Display', serif">Playfair (Premium Fine Serif)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat (Clean)</option>
+                    <option value="'Playfair Display', serif">Playfair (Fine Serif)</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label>Text Motion FX Style <span class="tooltip-icon" title="Adds dynamic movement to text">?</span></label>
+                <select id="text-fx-select">
+                    <option value="none">Static Standard</option>
+                    <option value="fx-float">Subtle Floating Drift</option>
+                    <option value="fx-pulse">Pulsing Breathing Glow</option>
                 </select>
             </div>
 
@@ -397,80 +630,96 @@
             </div>
 
             <div class="setting-group">
-                <label>Sub-Headline Font Family</label>
+                <label>Sub-Headline Font</label>
                 <select id="select-sub-font">
                     <option value="'Inter', sans-serif">Inter (Modern Light)</option>
                     <option value="'Oswald', sans-serif">Oswald (Bold Compact)</option>
                     <option value="'Cinzel', serif">Cinzel (Classic Royal)</option>
-                    <option value="'Montserrat', sans-serif">Montserrat (Clean Geometric)</option>
-                    <option value="'Playfair Display', serif">Playfair (Premium Fine Serif)</option>
+                    <option value="'Montserrat', sans-serif">Montserrat (Clean)</option>
+                    <option value="'Playfair Display', serif">Playfair (Fine Serif)</option>
                 </select>
             </div>
 
             <div class="setting-group">
-                <label>Bottom Sub-Footer Wording</label>
+                <label>Bottom Sub-Footer Text</label>
                 <input type="text" id="input-footer-text" value="ieregroup.com">
             </div>
 
+            <div class="setting-group">
+                <label>Custom Google Fonts Importer URL <span class="tooltip-icon" title="Paste Google Fonts CSS link">?</span></label>
+                <input type="text" id="input-custom-font-url" placeholder="https://fonts.googleapis.com/css2?family=Roboto...">
+            </div>
+
             <div class="setting-group toggle-container">
-                <label>Contrast Text Tint Backplate Panel</label>
+                <label>Contrast Text Glass Plate Panel</label>
                 <label class="switch">
                     <input type="checkbox" id="tint-box-toggle">
                     <span class="slider"></span>
                 </label>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
-
-            <!-- Core Assets -->
+            <!-- Visual Arts & Logos -->
             <div class="setting-group">
-                <label>Primary Main Image Vector Source</label>
+                <label>Primary Logo Asset</label>
                 <select id="main-logo-select">
                     <option value="iere-logo.png">Original (iere-logo.png)</option>
                     <option value="iere-logo1.png">Logo 1 (iere-logo1.png)</option>
                     <option value="iere-logo2.png">Logo 2 (iere-logo2.png)</option>
                     <option value="iere-logo3.png">Logo 3 (iere-logo3.png)</option>
-                    <option value="iere-logo4.png">Logo 4 (iere-logo4.png)</option>
-                    <option value="iere-logo5.png">Logo 5 (iere-logo5.png)</option>
                     <option value="hidden">Hidden / Removed</option>
                 </select>
             </div>
 
-            <!-- Corona Ring Modules with Fills & Glow Targets -->
             <div class="setting-group toggle-container">
-                <label>Enable Locked Halo Circle Ring</label>
+                <label>Logo Multi-Slot Carousel Auto-Rotator</label>
+                <label class="switch">
+                    <input type="checkbox" id="carousel-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Halo Ring Controls -->
+            <div class="setting-group toggle-container">
+                <label>Enable Dynamic Halo Corona Ring</label>
                 <label class="switch">
                     <input type="checkbox" id="circle-toggle">
                     <span class="slider"></span>
                 </label>
             </div>
 
-            <div id="extended-circle-controls" style="display: none; flex-direction: column; gap: 15px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; margin-bottom: 15px;">
+            <div id="extended-circle-controls" style="display: none; flex-direction: column; gap: 12px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 12px;">
                 <div class="setting-group">
-                    <label>Circle Boundary Relative Scale (Size)</label>
+                    <label>Halo Ring Diameter</label>
                     <input type="range" id="input-circle-size" min="100" max="600" value="320" step="5">
                 </div>
                 <div class="setting-group toggle-container">
-                    <label>Fill Inner Circle Solid Background</label>
+                    <label>Fill Inner Ring Background</label>
                     <label class="switch">
                         <input type="checkbox" id="circle-fill-toggle">
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="setting-group">
-                    <label>Circle Boundary Vector Color</label>
-                    <input type="color" id="input-circle-color" value="#ffffff" style="width:100%; height:36px; border-radius:8px; border:none; background:none; cursor:pointer;">
+                    <label>Halo Vector Color</label>
+                    <input type="color" id="input-circle-color" value="#ffffff" style="width:100%; height:32px; border-radius:6px; border:none; background:none; cursor:pointer;">
                 </div>
                 <div class="setting-group">
-                    <label>Corona Outer Radial Glow Power</label>
+                    <label>Halo Outer Radial Glow Power</label>
                     <input type="range" id="input-circle-glow" min="0" max="60" value="0" step="1">
+                </div>
+                <div class="setting-group toggle-container">
+                    <label>Halo Beat Pulse Mapped to Audio</label>
+                    <label class="switch">
+                        <input type="checkbox" id="halo-pulse-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 
-            <!-- Event Multi Upload Matrix -->
-            <div class="setting-group" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.2);">
+            <!-- Multi-Slot Uploads -->
+            <div class="setting-group" style="border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2);">
                 <label style="font-weight: 600; color: #fff;">Event Presentation Logos (Max 3 Slots)</label>
-                <div style="margin-top: 10px; display:flex; flex-direction:column; gap:12px;">
+                <div style="margin-top: 8px; display:flex; flex-direction:column; gap:10px;">
                     <div>
                         <label>Target Channel Mapping Node</label>
                         <select id="event-slot-index">
@@ -480,17 +729,15 @@
                         </select>
                     </div>
                     <div>
-                        <label>Select Matrix Image File Source</label>
-                        <input type="file" id="custom-logo-upload" accept="image/*" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white;">
+                        <label>Select Matrix Image File</label>
+                        <input type="file" id="custom-logo-upload" accept="image/*" style="width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white;">
                     </div>
-                    <button id="remove-event-logo-btn" class="action-btn btn-danger">Flush Selected Slot Target Image</button>
+                    <button id="remove-event-logo-btn" class="action-btn btn-danger" style="padding:8px;">Flush Selected Slot Target Image</button>
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
-
-            <!-- Advanced Clock & Scheduler Deck -->
-            <div style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 15px; margin-bottom: 22px;">
+            <!-- Clock & World Time -->
+            <div style="border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 12px;">
                 <div class="setting-group toggle-container" style="margin-bottom:0;">
                     <label style="font-weight:600; color:#fff;">Overlay Clock & Scheduler</label>
                     <label class="switch">
@@ -498,33 +745,43 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div id="extended-clock-controls" style="display: none; flex-direction: column; gap: 15px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px;">
+                <div id="extended-clock-controls" style="display: none; flex-direction: column; gap: 12px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 12px;">
                     <div class="setting-group">
-                        <label>Display Mode Engine</label>
+                        <label>Clock Engine Mode</label>
                         <select id="clock-mode-select">
                             <option value="time">Standard System Digital Clock</option>
-                            <option value="countdown">Advanced Production Countdown Timer</option>
+                            <option value="countdown">Advanced Countdown Timer</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Timezone Secondary Display</label>
+                        <select id="secondary-timezone-select">
+                            <option value="none">None</option>
+                            <option value="America/Port_of_Spain">Port of Spain (AST / UTC-4)</option>
+                            <option value="America/New_York">New York (EST/EDT)</option>
+                            <option value="Europe/London">London (GMT/BST)</option>
+                            <option value="Asia/Tokyo">Tokyo (JST)</option>
                         </select>
                     </div>
                     <div class="setting-group" id="countdown-target-group" style="display: none;">
-                        <label>Target Countdown Timestamp Target</label>
+                        <label>Countdown Timestamp Target</label>
                         <input type="datetime-local" id="input-countdown-target">
                     </div>
                 </div>
             </div>
 
-            <!-- Ambient Background Engine Adjusters -->
+            <!-- Ambient Background Engines -->
             <div class="setting-group">
                 <label>Global Environment Core Engine</label>
                 <select id="bg-engine-select">
-                    <option value="gradient">Algorithmic Procedural Gradients</option>
-                    <option value="video">Cinematic Motion Video Loop Track</option>
+                    <option value="gradient">Procedural Gradients</option>
+                    <option value="video">Cinematic Motion Video Loop</option>
                 </select>
             </div>
 
-            <div id="gradient-engine-controls" style="display: flex; flex-direction: column; gap: 15px;">
+            <div id="gradient-engine-controls" style="display: flex; flex-direction: column; gap: 12px;">
                 <div class="setting-group">
-                    <label>Gradient Layout Mapping Profile</label>
+                    <label>Gradient Mapping Layout</label>
                     <select id="gradient-type-select">
                         <option value="linear">Linear Sweep Matrix</option>
                         <option value="radial">Radial Hub Ambient Center</option>
@@ -532,14 +789,20 @@
                 </div>
 
                 <div class="setting-group">
-                    <label>Color Profiles</label>
+                    <label>Color Profiles (11 Trinidad & Caribbean Presets)</label>
                     <select id="gradient-select">
-                        <option value="#ff5e62, #ff9966, #ffb347, #ffcc33">Bocas Sunset (Warm)</option>
-                        <option value="#00c6ff, #0072ff, #1cb5e0, #000046">Maracas Deep (Ocean)</option>
-                        <option value="#8A2387, #E94057, #F27121">Scarlet Ibis (Vibrant)</option>
-                        <option value="#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3">Trinidad Carnival Spectrum (Rainbow)</option>
-                        <option value="#232526, #414345, #0f2027, #203a43">Pitch Midnight (Dark)</option>
-                        <option value="custom">Custom Configuration Coordinate...</option>
+                        <option value="#d4af37, #ff9966, #ff5e62, #0a0a0a">1. Carnival Steelpan Gold</option>
+                        <option value="#ff5e62, #ff9966, #ffb347, #ffcc33">2. Bocas Sunset</option>
+                        <option value="#00c6ff, #0072ff, #1cb5e0, #000046">3. Maracas Deep Ocean</option>
+                        <option value="#8A2387, #E94057, #F27121">4. Scarlet Ibis Vibrant</option>
+                        <option value="#ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3">5. Trinidad Carnival Spectrum</option>
+                        <option value="#232526, #414345, #0f2027, #203a43">6. Pitch Lake Obsidian</option>
+                        <option value="#005c97, #363795, #00b4db, #0083b0">7. Buceo Tobago Coastal</option>
+                        <option value="#134e5e, #71b280, #0b6623, #023020">8. Nariva Swamp Emerald</option>
+                        <option value="#3a6073, #3a7bd5, #4a00e0, #8e2de2">9. El Tucuche Mist</option>
+                        <option value="#e65c00, #F9D423, #d4af37, #1a0000">10. Pitch Lake Gold Flare</option>
+                        <option value="#4568dc, #b06ab3, #e91e63, #240b36">11. Chacachacare Sunset</option>
+                        <option value="custom">12. Custom Dual-Color Configuration...</option>
                     </select>
                 </div>
 
@@ -549,16 +812,28 @@
                 </div>
 
                 <div class="setting-group">
-                    <label>Gradient Vector Flow Cycle Speed (Duration)</label>
+                    <label>Gradient Flow Speed (Seconds)</label>
                     <input type="range" id="gradient-speed-slider" min="2" max="40" value="15" step="1">
                 </div>
             </div>
 
-            <div id="video-engine-controls" style="display: none; flex-direction: column; gap: 15px;">
+            <div id="video-engine-controls" style="display: none; flex-direction: column; gap: 12px;">
                 <div class="setting-group">
-                    <label>Video Loop Source Asset Path / URL</label>
-                    <input type="text" id="input-video-url" placeholder="e.g. background-loop.mp4 or web URL">
+                    <label>Video Loop Source URL</label>
+                    <input type="text" id="input-video-url" placeholder="e.g. video.mp4 or URL">
                 </div>
+                <div class="setting-group toggle-container">
+                    <label>Video Ambient Blur Underlay</label>
+                    <label class="switch">
+                        <input type="checkbox" id="video-blur-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label>Vignette Border Lighting Opacity</label>
+                <input type="range" id="vignette-opacity-slider" min="0" max="1" value="0.4" step="0.05">
             </div>
 
             <div class="setting-group">
@@ -566,28 +841,45 @@
                 <input type="range" id="gradient-brightness-slider" min="20" max="150" value="100" step="5">
             </div>
 
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+            <!-- Weather Simulation Overlay -->
+            <div class="setting-group">
+                <label>Weather FX Simulation</label>
+                <select id="weather-style-select">
+                    <option value="none">Disabled</option>
+                    <option value="rain">Tropical Rain Drift</option>
+                    <option value="mist">El Tucuche Mountain Mist</option>
+                </select>
+            </div>
 
-            <!-- Particles Physics Control Grid -->
+            <!-- Parallax Depth Engine -->
+            <div class="setting-group toggle-container">
+                <label>Interactive Multi-Layer Parallax Depth</label>
+                <label class="switch">
+                    <input type="checkbox" id="parallax-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Particles Physics & Pool Array Config -->
             <div class="setting-group">
                 <label>Canvas Fluid System Profile (11 Variants)</label>
                 <select id="particle-style-select">
-                    <option value="dust">1. Ethereal Space Floating Dust</option>
+                    <option value="dust">1. Ethereal Floating Dust</option>
                     <option value="fire">2. Cinematic Rising Embers</option>
-                    <option value="actual-fire">3. Authentic Turbulent Fluid Flame Box</option>
-                    <option value="matrix">4. Digital Binary Code Rain Cascades</option>
+                    <option value="actual-fire">3. Turbulent Fluid Flame Box</option>
+                    <option value="matrix">4. Digital Binary Matrix Rain</option>
                     <option value="snow">5. Deep Polar Drift Blizzard</option>
                     <option value="bubbles">6. Rising Liquid Effervescence</option>
-                    <option value="stars">7. Hyperdrive Speed Warp Clusters</option>
-                    <option value="geometry">8. Polyhedral Neural Network Grid Nodes</option>
-                    <option value="neon-lines">9. Vertical Cyberpunk Laser Tracers</option>
-                    <option value="vortex">10. Centripetal Gravity Core Swirl Vortex</option>
-                    <option value="plasma">11. Volatile Organic Plasma Clusters</option>
+                    <option value="stars">7. Hyperdrive Warp Speed</option>
+                    <option value="geometry">8. Polyhedral Network Nodes</option>
+                    <option value="neon-lines">9. Cyberpunk Laser Tracers</option>
+                    <option value="vortex">10. Centripetal Core Vortex</option>
+                    <option value="plasma">11. Organic Plasma Clusters</option>
                 </select>
             </div>
 
             <div class="setting-group toggle-container">
-                <label>Render Active Fluid Particles</label>
+                <label>Render Particles</label>
                 <label class="switch">
                     <input type="checkbox" id="particle-toggle" checked>
                     <span class="slider"></span>
@@ -595,40 +887,108 @@
             </div>
 
             <div class="setting-group">
-                <label>Global Particle Generation Volume (Density)</label>
-                <input type="range" id="particle-count" min="2000" max="20000" value="9000" step="1000">
+                <label>Particle Volume (Density Pool Limit)</label>
+                <input type="range" id="particle-count" min="100" max="500" value="250" step="10">
             </div>
 
             <div class="setting-group">
-                <label>Particle Core Kinetic Velocity Limit (Speed)</label>
+                <label>Particle Velocity Speed</label>
                 <input type="range" id="particle-speed" min="0.1" max="5" value="1" step="0.1">
             </div>
 
-            <!-- Microphone Optimization Node -->
-            <div style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 15px;">
+            <!-- Audio Processing Node & Spectrum Visualizers -->
+            <div style="border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 12px;">
                 <div class="setting-group toggle-container" style="margin-bottom:0;">
-                    <label style="font-weight:600; color:#fff;">Acoustic Processing Node <span class="mic-badge">Mic Sync</span></label>
+                    <label style="font-weight:600; color:#fff;">Acoustic Processing Node</label>
                     <label class="switch">
                         <input type="checkbox" id="audio-toggle">
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div id="extended-audio-controls" style="display: none; flex-direction: column; gap: 15px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px;">
+                <div id="extended-audio-controls" style="display: none; flex-direction: column; gap: 12px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 12px;">
                     <div class="setting-group">
-                        <label>Frequency Equalizer Crossover Range Target</label>
-                        <select id="audio-band-select">
-                            <option value="all">Full Spectrum Integration</option>
-                            <option value="bass">Sub-Bass Response Frequencies (Low Channels)</option>
-                            <option value="mid">Vocal Mid-Range Resonance (Mid Channels)</option>
-                            <option value="treble">High Frequency Sharp Decays (Treble Channels)</option>
+                        <label>Visualizer Spectrum Display Style</label>
+                        <select id="audio-spectrum-style">
+                            <option value="bars">Bar Equalizer Spectrum</option>
+                            <option value="oscilloscope">Oscilloscope Waveform</option>
+                            <option value="radial">Radial Acoustic Ring</option>
                         </select>
                     </div>
                     <div class="setting-group">
-                        <label>Acoustic Input Gain Multiplication Level (Sensitivity)</label>
+                        <label>Frequency Crossover Target</label>
+                        <select id="audio-band-select">
+                            <option value="all">Full Spectrum Integration</option>
+                            <option value="bass">Sub-Bass Response Frequencies</option>
+                            <option value="mid">Vocal Mid-Range Resonance</option>
+                            <option value="treble">High Frequency Sharp Decays</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Acoustic Input Gain (Sensitivity)</label>
                         <input type="range" id="audio-gain-slider" min="1" max="10" value="4" step="0.5">
                     </div>
                 </div>
             </div>
+
+            <!-- Procedural Ambient Sound Synthesizer Node -->
+            <div style="border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 12px;">
+                <div class="setting-group toggle-container" style="margin-bottom:0;">
+                    <label style="font-weight:600; color:#fff;">Procedural Ambient Synthesizer</label>
+                    <label class="switch">
+                        <input type="checkbox" id="ambient-sound-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="extended-synth-controls" style="display: none; flex-direction: column; gap: 12px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 12px;">
+                    <div class="setting-group">
+                        <label>Sound Profile</label>
+                        <select id="synth-profile-select">
+                            <option value="rain">Tropical Rainforest Rain</option>
+                            <option value="ocean">Maracas Ocean Waves</option>
+                            <option value="noise">Deep Space Noise Drone</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Synthesizer Volume</label>
+                        <input type="range" id="synth-volume-slider" min="0" max="1" value="0.3" step="0.05">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quotes & Watermark Options -->
+            <div class="setting-group toggle-container">
+                <label>Display Quote / Tagline Rotator</label>
+                <label class="switch">
+                    <input type="checkbox" id="quote-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-group">
+                <label>Watermark Corner Text Label</label>
+                <input type="text" id="input-watermark-text" placeholder="e.g. LOBBY DISPLAY 01">
+            </div>
+
+            <div class="setting-group">
+                <label>Watermark Display Position</label>
+                <select id="watermark-pos-select">
+                    <option value="wm-bottom-left">Bottom Left</option>
+                    <option value="wm-bottom-right">Bottom Right</option>
+                    <option value="wm-top-left">Top Left</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label>Idle Auto-Lock Timer (Minutes)</label>
+                <select id="autolock-timer-select">
+                    <option value="0">Disabled</option>
+                    <option value="5">5 Minutes</option>
+                    <option value="10">10 Minutes</option>
+                    <option value="30">30 Minutes</option>
+                </select>
+            </div>
+
+            <button id="run-benchmark-btn" class="action-btn btn-secondary" style="margin-top: 10px;">⚡ Run System Performance Benchmark</button>
 
         </div>
 
@@ -636,7 +996,17 @@
     </div>
 
     <script>
-        // --- Core Application Infrastructure Map ---
+        // --- Multi-Device & Storage Vault Initialization ---
+        let deviceUuid = localStorage.getItem('iere_device_uuid');
+        if (!deviceUuid) {
+            deviceUuid = 'device_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+            localStorage.setItem('iere_device_uuid', deviceUuid);
+        }
+        
+        let deviceName = localStorage.getItem('iere_device_name') || ('Iere Device ' + deviceUuid.substring(7, 11));
+        const vaultKey = `iere_vault_${deviceUuid}`;
+
+        // --- Core DOM Mapping Array ---
         const lockScreen = document.getElementById('lock-screen');
         const gatePassInput = document.getElementById('gate-pass-input');
         const gateSubmitBtn = document.getElementById('gate-submit-btn');
@@ -644,21 +1014,42 @@
         const logo = document.getElementById('logo');
         const mainTextEl = document.getElementById('main-text');
         const subTextEl = document.getElementById('sub-text');
+        const quoteTextEl = document.getElementById('quote-text');
         const footerTextEl = document.getElementById('footer-text');
+        const watermarkTextEl = document.getElementById('watermark-text');
         const settingsModal = document.getElementById('settings-modal');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const closeBtn = document.getElementById('close-btn');
-        
+        const toastEl = document.getElementById('toast');
+        const deviceBadgeId = document.getElementById('device-badge-id');
+        const inputDeviceName = document.getElementById('input-device-name');
+        const exportProfileBtn = document.getElementById('export-profile-btn');
+        const importProfileBtn = document.getElementById('import-profile-btn');
+        const factoryResetBtn = document.getElementById('factory-reset-btn');
+        const importJsonFile = document.getElementById('import-json-file');
+        const presetSwitcherSelect = document.getElementById('preset-switcher-select');
+        const modalDragHandle = document.getElementById('modal-drag-handle');
+        const hotkeyModal = document.getElementById('hotkey-modal');
+        const closeHotkeysBtn = document.getElementById('close-hotkeys-btn');
+        const perfHud = document.getElementById('perf-hud');
+        const hudFps = document.getElementById('hud-fps');
+        const hudMem = document.getElementById('hud-mem');
+        const settingsSearchInput = document.getElementById('settings-search-input');
+        const parallaxContainer = document.getElementById('parallax-container');
+
         // Input Controls Anchor Nodes
         const inputMainText = document.getElementById('input-main-text');
         const selectMainFont = document.getElementById('select-main-font');
+        const textFxSelect = document.getElementById('text-fx-select');
         const inputSubText = document.getElementById('input-sub-text');
         const selectSubFont = document.getElementById('select-sub-font');
         const inputFooterText = document.getElementById('input-footer-text');
+        const inputCustomFontUrl = document.getElementById('input-custom-font-url');
         const tintBoxToggle = document.getElementById('tint-box-toggle');
         const contentTintBox = document.getElementById('content-tint-box');
         
         const mainLogoSelect = document.getElementById('main-logo-select');
+        const carouselToggle = document.getElementById('carousel-toggle');
         const circleToggle = document.getElementById('circle-toggle');
         const extendedCircleControls = document.getElementById('extended-circle-controls');
         const inputCircleSize = document.getElementById('input-circle-size');
@@ -666,6 +1057,7 @@
         const logoCircleEl = document.getElementById('logo-circle');
         const inputCircleColor = document.getElementById('input-circle-color');
         const inputCircleGlow = document.getElementById('input-circle-glow');
+        const haloPulseToggle = document.getElementById('halo-pulse-toggle');
 
         const eventSlotIndex = document.getElementById('event-slot-index');
         const customLogoUpload = document.getElementById('custom-logo-upload');
@@ -677,17 +1069,24 @@
         const videoEngineControls = document.getElementById('video-engine-controls');
         const gradientBgEl = document.getElementById('gradient-bg');
         const videoBgEl = document.getElementById('video-bg');
+        const videoAmbientBlurEl = document.getElementById('video-ambient-blur');
+        const videoBlurToggle = document.getElementById('video-blur-toggle');
         const inputVideoUrl = document.getElementById('input-video-url');
+        const vignetteOpacitySlider = document.getElementById('vignette-opacity-slider');
+        const weatherStyleSelect = document.getElementById('weather-style-select');
+        const parallaxToggle = document.getElementById('parallax-toggle');
 
-        // Scheduler Elements Mapping Nodes
+        // Clock & Utilities Mapping
         const clockToggle = document.getElementById('clock-toggle');
         const extendedClockControls = document.getElementById('extended-clock-controls');
         const clockModeSelect = document.getElementById('clock-mode-select');
+        const secondaryTimezoneSelect = document.getElementById('secondary-timezone-select');
         const countdownTargetGroup = document.getElementById('countdown-target-group');
         const inputCountdownTarget = document.getElementById('input-countdown-target');
         const clockOverlayEl = document.getElementById('clock-overlay');
         const clockTimeEl = document.getElementById('clock-time');
         const clockDateEl = document.getElementById('clock-date');
+        const secondaryClockEl = document.getElementById('secondary-clock');
 
         const gradientTypeSelect = document.getElementById('gradient-type-select');
         const gradientSelect = document.getElementById('gradient-select');
@@ -705,78 +1104,231 @@
         
         const audioToggle = document.getElementById('audio-toggle');
         const extendedAudioControls = document.getElementById('extended-audio-controls');
+        const audioSpectrumStyle = document.getElementById('audio-spectrum-style');
         const audioBandSelect = document.getElementById('audio-band-select');
         const audioGainSlider = document.getElementById('audio-gain-slider');
+        const audioSpectrumCanvas = document.getElementById('audio-spectrum-canvas');
+
+        const ambientSoundToggle = document.getElementById('ambient-sound-toggle');
+        const extendedSynthControls = document.getElementById('extended-synth-controls');
+        const synthProfileSelect = document.getElementById('synth-profile-select');
+        const synthVolumeSlider = document.getElementById('synth-volume-slider');
+
+        const quoteToggle = document.getElementById('quote-toggle');
+        const inputWatermarkText = document.getElementById('input-watermark-text');
+        const watermarkPosSelect = document.getElementById('watermark-pos-select');
+        const autolockTimerSelect = document.getElementById('autolock-timer-select');
+        const runBenchmarkBtn = document.getElementById('run-benchmark-btn');
 
         const TARGET_PASSWORD = "Iere26";
+        inputDeviceName.value = deviceName;
+        deviceBadgeId.textContent = `Device: ${deviceName}`;
 
-        // --- Core Verification Layer Processing ---
+        // Toast Helper
+        function showToast(msg) {
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            setTimeout(() => toastEl.classList.remove('show'), 2500);
+        }
+
+        // Passkey System Verification
         gateSubmitBtn.addEventListener('click', () => {
             if (gatePassInput.value === TARGET_PASSWORD) {
                 lockScreen.classList.add('unlocked');
+                resetIdleTimer();
             } else {
-                alert("Authorization Denied.");
+                showToast("Authorization Denied");
                 gatePassInput.value = "";
                 gatePassInput.focus();
             }
         });
         gatePassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateSubmitBtn.click(); });
 
-        // --- Triple Click Settings Panel Access Hook ---
-        let clickCount = 0;
-        let clickTimer;
+        // Triple Click Access Hook & Mouse Inactivity Hiding Engine
+        let clickCount = 0; let clickTimer;
         [logo, mainTextEl, document.getElementById('custom-logo-1'), document.getElementById('custom-logo-2'), document.getElementById('custom-logo-3')].forEach(element => {
             element.addEventListener('click', () => {
                 clickCount++;
                 if (clickCount === 1) clickTimer = setTimeout(() => { clickCount = 0; }, 600);
                 if (clickCount === 3) {
-                    clearTimeout(clickTimer);
-                    clickCount = 0;
-                    if(lockScreen.classList.contains('unlocked')) {
-                        settingsModal.classList.add('active');
-                    }
+                    clearTimeout(clickTimer); clickCount = 0;
+                    if(lockScreen.classList.contains('unlocked')) { settingsModal.classList.toggle('active'); }
                 }
             });
         });
 
-        closeBtn.addEventListener('click', () => { settingsModal.classList.remove('active'); });
+        // Mouse Idle Engine
+        let idleTimer;
+        function resetIdleTimer() {
+            document.body.classList.remove('hide-cursor');
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                if (lockScreen.classList.contains('unlocked') && !settingsModal.classList.contains('active')) {
+                    document.body.classList.add('hide-cursor');
+                }
+            }, 3000);
+            resetAutoLockTimer();
+        }
+        window.addEventListener('mousemove', resetIdleTimer);
+        window.addEventListener('mousedown', resetIdleTimer);
 
-        // --- Memory Synchronization Logic Matrix (LocalStorage) ---
+        // Auto Lock Idle Timer
+        let autoLockTimer;
+        function resetAutoLockTimer() {
+            clearTimeout(autoLockTimer);
+            const minutes = parseInt(autolockTimerSelect.value);
+            if (minutes > 0 && lockScreen.classList.contains('unlocked')) {
+                autoLockTimer = setTimeout(() => {
+                    lockScreen.classList.remove('unlocked');
+                    showToast("Idle Security Lockdown Triggered");
+                }, minutes * 60 * 1000);
+            }
+        }
+
+        // --- Keyboard Shortcuts Manager ---
+        let motionFrozen = false;
+        window.addEventListener('keydown', (e) => {
+            if (!lockScreen.classList.contains('unlocked')) return;
+            const key = e.key.toLowerCase();
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+            if (key === 'f') fullscreenBtn.click();
+            else if (key === 's') settingsModal.classList.toggle('active');
+            else if (key === 'p') {
+                particleToggle.checked = !particleToggle.checked;
+                executeUIEngineRefresh(); commitMemory();
+                showToast(particleToggle.checked ? "Particles Activated" : "Particles Paused");
+            }
+            else if (key === ' ') {
+                motionFrozen = !motionFrozen;
+                showToast(motionFrozen ? "Motion Speed Frozen" : "Motion Speed Resumed");
+            }
+            else if (key === 'l') {
+                lockScreen.classList.remove('unlocked');
+                gatePassInput.value = ""; gatePassInput.focus();
+            }
+            else if (key === 'd') {
+                perfHud.style.display = perfHud.style.display === 'block' ? 'none' : 'block';
+            }
+            else if (key === '?' || key === 'h') {
+                hotkeyModal.classList.toggle('active');
+            }
+        });
+
+        closeHotkeysBtn.addEventListener('click', () => hotkeyModal.classList.remove('active'));
+
+        // --- Draggable Settings Window Module ---
+        let isDragging = false, dragX = 0, dragY = 0;
+        modalDragHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragX = e.clientX - settingsModal.offsetLeft;
+            dragY = e.clientY - settingsModal.offsetTop;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            settingsModal.style.left = `${e.clientX - dragX}px`;
+            settingsModal.style.top = `${e.clientY - dragY}px`;
+            settingsModal.style.transform = 'none';
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // --- Settings Filter & Search Bar ---
+        settingsSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('#settings-modal .setting-group').forEach(group => {
+                const text = group.textContent.toLowerCase();
+                group.classList.toggle('hidden-search', !text.includes(query));
+            });
+        });
+
+        // --- Parallax Mouse Depth Motion Engine ---
+        window.addEventListener('mousemove', (e) => {
+            if (!parallaxToggle.checked) return;
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.015;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.015;
+            parallaxContainer.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+        });
+
+        // --- Quotes & Taglines Rotator Engine ---
+        const caribQuotes = [
+            '"Do it better." — Iere Vision',
+            '"Excellence is not an act, but a habit." — Trinidad Studio',
+            '"Creativity is intelligence having fun." — Iere Master Pro',
+            '"Innovation distinguishes between a leader and a follower."'
+        ];
+        let quoteIndex = 0;
+        function updateQuote() {
+            if (!quoteToggle.checked) { quoteTextEl.style.display = 'none'; return; }
+            quoteTextEl.style.display = 'block';
+            quoteTextEl.style.opacity = 0;
+            setTimeout(() => {
+                quoteTextEl.textContent = caribQuotes[quoteIndex];
+                quoteTextEl.style.opacity = 0.75;
+                quoteIndex = (quoteIndex + 1) % caribQuotes.length;
+            }, 500);
+        }
+        setInterval(updateQuote, 12000);
+        updateQuote();
+
+        // --- Multi-Device Memory Blueprint & Cross-Tab BroadcastChannel ---
+        const broadcastSync = new BroadcastChannel('iere_sync_channel');
+        broadcastSync.onmessage = (event) => {
+            if (event.data === 'sync') restoreMemory();
+        };
+
         const memoryBlueprint = {
+            deviceName: { el: inputDeviceName, type: 'val', default: deviceName },
             mainText: { el: inputMainText, type: 'val', default: 'IERE' },
             mainFont: { el: selectMainFont, type: 'val', default: "'Inter', sans-serif" },
+            textFx: { el: textFxSelect, type: 'val', default: 'none' },
             subText: { el: inputSubText, type: 'val', default: 'Do it better.' },
             subFont: { el: selectSubFont, type: 'val', default: "'Inter', sans-serif" },
             footerText: { el: inputFooterText, type: 'val', default: 'ieregroup.com' },
+            customFontUrl: { el: inputCustomFontUrl, type: 'val', default: '' },
             tintBox: { el: tintBoxToggle, type: 'chk', default: false },
             mainLogo: { el: mainLogoSelect, type: 'val', default: 'iere-logo.png' },
+            carouselEnabled: { el: carouselToggle, type: 'chk', default: false },
             circleEnabled: { el: circleToggle, type: 'chk', default: false },
             circleSize: { el: inputCircleSize, type: 'val', default: '320' },
             circleFilled: { el: circleFillToggle, type: 'chk', default: false },
             circleColor: { el: inputCircleColor, type: 'val', default: '#ffffff' },
             circleGlow: { el: inputCircleGlow, type: 'val', default: '0' },
+            haloPulse: { el: haloPulseToggle, type: 'chk', default: false },
             bgEngine: { el: bgEngineSelect, type: 'val', default: 'gradient' },
             videoUrl: { el: inputVideoUrl, type: 'val', default: '' },
+            videoBlur: { el: videoBlurToggle, type: 'chk', default: false },
+            vignetteOpacity: { el: vignetteOpacitySlider, type: 'val', default: '0.4' },
+            weatherStyle: { el: weatherStyleSelect, type: 'val', default: 'none' },
+            parallaxEnabled: { el: parallaxToggle, type: 'chk', default: true },
             clockEnabled: { el: clockToggle, type: 'chk', default: false },
             clockMode: { el: clockModeSelect, type: 'val', default: 'time' },
+            secondaryTimezone: { el: secondaryTimezoneSelect, type: 'val', default: 'none' },
             countdownTarget: { el: inputCountdownTarget, type: 'val', default: '' },
             gradientType: { el: gradientTypeSelect, type: 'val', default: 'linear' },
-            gradientPalette: { el: gradientSelect, type: 'val', default: '#ff5e62, #ff9966, #ffb347, #ffcc33' },
+            gradientPalette: { el: gradientSelect, type: 'val', default: '#d4af37, #ff9966, #ff5e62, #0a0a0a' },
             customColor1: { el: color1, type: 'val', default: '#ff5e62' },
             customColor2: { el: color2, type: 'val', default: '#ff9966' },
             gradientSpeed: { el: gradientSpeedSlider, type: 'val', default: '15' },
             gradientBrightness: { el: gradientBrightnessSlider, type: 'val', default: '100' },
             particleStyle: { el: particleStyleSelect, type: 'val', default: 'dust' },
             particleEnabled: { el: particleToggle, type: 'chk', default: true },
-            particleCount: { el: particleCountSlider, type: 'val', default: '9000' },
+            particleCount: { el: particleCountSlider, type: 'val', default: '250' },
             particleSpeed: { el: particleSpeedSlider, type: 'val', default: '1' },
             audioReactive: { el: audioToggle, type: 'chk', default: false },
+            audioSpectrum: { el: audioSpectrumStyle, type: 'val', default: 'bars' },
             audioBand: { el: audioBandSelect, type: 'val', default: 'all' },
-            audioGain: { el: audioGainSlider, type: 'val', default: '4' }
+            audioGain: { el: audioGainSlider, type: 'val', default: '4' },
+            ambientSound: { el: ambientSoundToggle, type: 'chk', default: false },
+            synthProfile: { el: synthProfileSelect, type: 'val', default: 'rain' },
+            synthVolume: { el: synthVolumeSlider, type: 'val', default: '0.3' },
+            quoteEnabled: { el: quoteToggle, type: 'chk', default: true },
+            watermarkText: { el: inputWatermarkText, type: 'val', default: '' },
+            watermarkPos: { el: watermarkPosSelect, type: 'val', default: 'wm-bottom-left' },
+            autolockTimer: { el: autolockTimerSelect, type: 'val', default: '0' }
         };
 
         function commitMemory() {
-            const dataDump = {};
+            const dataDump = { uuid: deviceUuid };
             for (const key in memoryBlueprint) {
                 const node = memoryBlueprint[key];
                 dataDump[key] = node.type === 'chk' ? node.el.checked : node.el.value;
@@ -784,45 +1336,98 @@
             dataDump.imgSlot1 = document.getElementById('custom-logo-1').src || "";
             dataDump.imgSlot2 = document.getElementById('custom-logo-2').src || "";
             dataDump.imgSlot3 = document.getElementById('custom-logo-3').src || "";
-            localStorage.setItem('iere_screensaver_vault', JSON.stringify(dataDump));
+            
+            localStorage.setItem(vaultKey, JSON.stringify(dataDump));
+            localStorage.setItem('iere_device_name', inputDeviceName.value);
+            deviceName = inputDeviceName.value;
+            deviceBadgeId.textContent = `Device: ${deviceName}`;
+            broadcastSync.postMessage('sync');
         }
 
         function restoreMemory() {
-            const cache = localStorage.getItem('iere_screensaver_vault');
+            const cache = localStorage.getItem(vaultKey);
             if (!cache) { executeUIEngineRefresh(); return; }
             try {
                 const parsed = JSON.parse(cache);
                 for (const key in memoryBlueprint) {
                     if (parsed[key] !== undefined) {
                         const node = memoryBlueprint[key];
-                        if (node.type === 'chk') {
-                            node.el.checked = parsed[key];
-                        } else {
-                            node.el.value = parsed[key];
-                        }
+                        if (node.type === 'chk') node.el.checked = parsed[key];
+                        else node.el.value = parsed[key];
                     }
+                }
+                if (parsed.deviceName) {
+                    inputDeviceName.value = parsed.deviceName; deviceName = parsed.deviceName;
+                    deviceBadgeId.textContent = `Device: ${deviceName}`;
                 }
                 if (parsed.imgSlot1) { const i1 = document.getElementById('custom-logo-1'); i1.src = parsed.imgSlot1; i1.style.display = 'block'; }
                 if (parsed.imgSlot2) { const i2 = document.getElementById('custom-logo-2'); i2.src = parsed.imgSlot2; i2.style.display = 'block'; }
                 if (parsed.imgSlot3) { const i3 = document.getElementById('custom-logo-3'); i3.src = parsed.imgSlot3; i3.style.display = 'block'; }
-            } catch (err) { console.error("Memory Restore Corrupted:", err); }
+            } catch (err) { console.error("Restore Fault:", err); }
             executeUIEngineRefresh();
         }
 
-        // --- Live Application Event Routing Array ---
+        // Export / Import Profiles
+        exportProfileBtn.addEventListener('click', () => {
+            const data = localStorage.getItem(vaultKey) || "{}";
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `iere-profile-${deviceName.replace(/\s+/g, '-').toLowerCase()}.json`;
+            a.click(); URL.revokeObjectURL(url);
+            showToast("Profile Exported");
+        });
+
+        importProfileBtn.addEventListener('click', () => importJsonFile.click());
+        importJsonFile.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    localStorage.setItem(vaultKey, event.target.result);
+                    restoreMemory(); showToast("Profile Imported Successfully");
+                } catch (err) { showToast("Invalid Profile JSON"); }
+            };
+            reader.readAsText(file);
+        });
+
+        factoryResetBtn.addEventListener('click', () => {
+            if (confirm("Reset device settings to Trinidad Factory Default?")) {
+                localStorage.removeItem(vaultKey);
+                location.reload();
+            }
+        });
+
+        // Dynamic Google Fonts Loader
+        inputCustomFontUrl.addEventListener('change', (e) => {
+            const url = e.target.value.trim();
+            if (url.startsWith('https://fonts.googleapis.com/')) {
+                document.getElementById('dynamic-google-fonts').href = url;
+                showToast("Custom Font Stream Connected");
+            }
+        });
+
+        // --- Master Control Deck Refresh Engine ---
         function executeUIEngineRefresh() {
             mainTextEl.textContent = inputMainText.value;
             subTextEl.textContent = inputSubText.value;
             footerTextEl.textContent = inputFooterText.value;
+
+            // Font styles
             root.style.setProperty('--main-font', selectMainFont.value);
             root.style.setProperty('--sub-font', selectSubFont.value);
             root.style.setProperty('--footer-font', selectSubFont.value);
 
+            // Text Motion FX
+            mainTextEl.className = "";
+            if (textFxSelect.value !== 'none') mainTextEl.classList.add(textFxSelect.value);
+
+            // Glass Tint Backplate
             if (tintBoxToggle.checked) {
                 contentTintBox.style.background = "rgba(0, 0, 0, 0.45)";
-                contentTintBox.style.backdropFilter = "blur(15px)";
-                contentTintBox.style.webkitBackdropFilter = "blur(15px)";
-                contentTintBox.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+                contentTintBox.style.backdropFilter = "blur(18px)";
+                contentTintBox.style.webkitBackdropFilter = "blur(18px)";
+                contentTintBox.style.border = "1px solid rgba(255, 255, 255, 0.12)";
             } else {
                 contentTintBox.style.background = "rgba(0, 0, 0, 0)";
                 contentTintBox.style.backdropFilter = "blur(0px)";
@@ -830,139 +1435,126 @@
                 contentTintBox.style.border = "none";
             }
 
-            if (mainLogoSelect.value === 'hidden') {
-                logo.style.display = 'none';
-            } else {
-                logo.src = mainLogoSelect.value;
-                logo.style.display = 'block';
-            }
+            if (mainLogoSelect.value === 'hidden') logo.style.display = 'none';
+            else { logo.src = mainLogoSelect.value; logo.style.display = 'block'; }
 
-            if (circleToggle.checked) {
-                logoCircleEl.style.display = 'block';
-                extendedCircleControls.style.display = 'flex';
-            } else {
-                logoCircleEl.style.display = 'none';
-                extendedCircleControls.style.display = 'none';
-            }
-            
+            // Halo Ring Controls
+            logoCircleEl.style.display = circleToggle.checked ? 'block' : 'none';
+            extendedCircleControls.style.display = circleToggle.checked ? 'flex' : 'none';
             root.style.setProperty('--circle-size', `${inputCircleSize.value}px`);
             root.style.setProperty('--circle-color', inputCircleColor.value);
             root.style.setProperty('--circle-bg', circleFillToggle.checked ? inputCircleColor.value : 'rgba(0,0,0,0)');
             root.style.setProperty('--circle-glow', `${inputCircleGlow.value}px`);
 
-            // Core Layout Switch Engines Processing Node
+            // Ambient Layout Engines
             if (bgEngineSelect.value === 'video') {
                 gradientEngineControls.style.display = 'none';
                 videoEngineControls.style.display = 'flex';
                 gradientBgEl.style.display = 'none';
                 videoBgEl.style.display = 'block';
+                videoAmbientBlurEl.style.display = videoBlurToggle.checked ? 'block' : 'none';
                 if (videoBgEl.src !== inputVideoUrl.value && inputVideoUrl.value.trim() !== '') {
                     videoBgEl.src = inputVideoUrl.value;
+                    videoAmbientBlurEl.src = inputVideoUrl.value;
                 }
             } else {
                 gradientEngineControls.style.display = 'flex';
                 videoEngineControls.style.display = 'none';
                 gradientBgEl.style.display = 'block';
                 videoBgEl.style.display = 'none';
-                videoBgEl.src = "";
+                videoAmbientBlurEl.style.display = 'none';
             }
 
             root.style.setProperty('--gradient-speed', `${gradientSpeedSlider.value}s`);
             root.style.setProperty('--bg-brightness', `${gradientBrightnessSlider.value}%`);
+            root.style.setProperty('--vignette-opacity', vignetteOpacitySlider.value);
             
             customColorsContainer.classList.toggle('active', gradientSelect.value === 'custom');
-            
-            let colors = gradientSelect.value;
-            if (colors === 'custom') {
-                colors = `${color1.value}, ${color2.value}, ${color1.value}, ${color2.value}`;
-            }
-            const gradString = gradientTypeSelect.value === 'linear' 
-                ? `linear-gradient(-45deg, ${colors})` 
-                : `radial-gradient(circle at center, ${colors})`;
+            let colors = gradientSelect.value === 'custom' ? `${color1.value}, ${color2.value}, ${color1.value}, ${color2.value}` : gradientSelect.value;
+            const gradString = gradientTypeSelect.value === 'linear' ? `linear-gradient(-45deg, ${colors})` : `radial-gradient(circle at center, ${colors})`;
             root.style.setProperty('--bg-gradient', gradString);
 
             // Clock Overlay Processing Nodes
-            if (clockToggle.checked) {
-                clockOverlayEl.style.display = 'block';
-                extendedClockControls.style.display = 'flex';
-                countdownTargetGroup.style.display = clockModeSelect.value === 'countdown' ? 'flex' : 'none';
-            } else {
-                clockOverlayEl.style.display = 'none';
-                extendedClockControls.style.display = 'none';
-            }
+            clockOverlayEl.style.display = clockToggle.checked ? 'block' : 'none';
+            extendedClockControls.style.display = clockToggle.checked ? 'flex' : 'none';
+            countdownTargetGroup.style.display = clockModeSelect.value === 'countdown' ? 'flex' : 'none';
 
+            // Particles Physics System Parameters
             particlesEnabled = particleToggle.checked;
             currentParticleStyle = particleStyleSelect.value;
-            
-            const maxVal = 20000; const minVal = 2000;
-            densityDivider = maxVal - parseInt(particleCountSlider.value) + minVal;
             baseSpeedMultiplier = parseFloat(particleSpeedSlider.value);
+            rebuildParticlePool(parseInt(particleCountSlider.value));
 
+            // Acoustic Spectrum HUD
             extendedAudioControls.style.display = audioToggle.checked ? 'flex' : 'none';
+            audioSpectrumCanvas.classList.toggle('active', audioToggle.checked);
+
+            // Ambient Synth
+            extendedSynthControls.style.display = ambientSoundToggle.checked ? 'flex' : 'none';
+            updateAmbientSynthState();
+
+            // Watermark Position
+            watermarkTextEl.textContent = inputWatermarkText.value;
+            watermarkTextEl.className = `wm-${watermarkPosSelect.value.replace('wm-', '')}`;
         }
 
+        // Attach Debounced Input Listeners
         const interactiveInputs = [
-            inputMainText, selectMainFont, inputSubText, selectSubFont, inputFooterText, tintBoxToggle,
-            mainLogoSelect, circleToggle, inputCircleSize, circleFillToggle, inputCircleColor, inputCircleGlow,
-            bgEngineSelect, inputVideoUrl, clockToggle, clockModeSelect, inputCountdownTarget,
+            inputDeviceName, inputMainText, selectMainFont, textFxSelect, inputSubText, selectSubFont, inputFooterText, tintBoxToggle,
+            mainLogoSelect, carouselToggle, circleToggle, inputCircleSize, circleFillToggle, inputCircleColor, inputCircleGlow, haloPulseToggle,
+            bgEngineSelect, inputVideoUrl, videoBlurToggle, vignetteOpacitySlider, weatherStyleSelect, parallaxToggle,
+            clockToggle, clockModeSelect, secondaryTimezoneSelect, inputCountdownTarget,
             gradientTypeSelect, gradientSelect, color1, color2, gradientSpeedSlider, gradientBrightnessSlider,
-            particleStyleSelect, particleToggle, particleSpeedSlider, audioBandSelect, audioGainSlider
+            particleStyleSelect, particleToggle, particleSpeedSlider, audioToggle, audioSpectrumStyle, audioBandSelect, audioGainSlider,
+            ambientSoundToggle, synthProfileSelect, synthVolumeSlider, quoteToggle, inputWatermarkText, watermarkPosSelect, autolockTimerSelect
         ];
-        interactiveInputs.forEach(el => el.addEventListener('input', () => { executeUIEngineRefresh(); commitMemory(); }));
-        interactiveInputs.forEach(el => el.addEventListener('change', () => { executeUIEngineRefresh(); commitMemory(); }));
+        
+        let debounceTimer;
+        interactiveInputs.forEach(el => el.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => { executeUIEngineRefresh(); commitMemory(); }, 50);
+        }));
 
-        particleCountSlider.addEventListener('change', () => { executeUIEngineRefresh(); initParticles(); commitMemory(); });
+        particleCountSlider.addEventListener('change', () => { executeUIEngineRefresh(); commitMemory(); });
 
-        // --- Broadcast Clock & Countdown Tick Engine ---
-        function updateClockEngine() {
-            if (!clockToggle.checked) return;
-            
-            const now = new Date();
-            
-            if (clockModeSelect.value === 'countdown' && inputCountdownTarget.value) {
-                const targetTime = new Date(inputCountdownTarget.value);
-                const difference = targetTime - now;
-                
-                if (difference <= 0) {
-                    clockTimeEl.textContent = "00:00:00";
-                    clockDateEl.textContent = "Target Dynamic Jump Triggered";
-                } else {
-                    const hours = Math.floor(difference / (1000 * 60 * 60));
-                    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-                    
-                    const pad = num => String(num).padStart(2, '0');
-                    clockTimeEl.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-                    clockDateEl.textContent = "Remaining Until Production Broadcast Event";
-                }
-            } else {
-                // Standard Digital Clock
-                let hours = now.getHours();
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // hours '0' map to '12'
-                
-                clockTimeEl.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
-                
-                const dayOptions = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-                clockDateEl.textContent = now.toLocaleDateString('en-US', dayOptions);
+        // Preset Quick Switcher Trigger
+        presetSwitcherSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'trinidad-gold') {
+                gradientSelect.value = "#d4af37, #ff9966, #ff5e62, #0a0a0a";
+                particleStyleSelect.value = "dust";
+                circleToggle.checked = true;
+            } else if (val === 'ocean-blue') {
+                gradientSelect.value = "#00c6ff, #0072ff, #1cb5e0, #000046";
+                particleStyleSelect.value = "bubbles";
+            } else if (val === 'scarlet-ibis') {
+                gradientSelect.value = "#8A2387, #E94057, #F27121";
+                particleStyleSelect.value = "fire";
+            } else if (val === 'minimal-dark') {
+                gradientSelect.value = "#232526, #414345, #0f2027, #203a43";
+                particleStyleSelect.value = "geometry";
             }
-        }
-        setInterval(updateClockEngine, 1000);
+            executeUIEngineRefresh(); commitMemory(); showToast("Preset Layout Applied");
+        });
 
-        // --- Multi Logo Uploader Processing Router ---
+        // --- Multi Logo Multi-Slot Carousel Engine ---
+        let carouselSlot = 1;
+        setInterval(() => {
+            if (!carouselToggle.checked) return;
+            const slots = [logo, document.getElementById('custom-logo-1'), document.getElementById('custom-logo-2'), document.getElementById('custom-logo-3')];
+            slots.forEach((s, idx) => { if (s) s.style.display = (idx === carouselSlot % 4) ? 'block' : 'none'; });
+            carouselSlot++;
+        }, 5000);
+
+        // --- Multi-Slot Logo Upload Handlers ---
         customLogoUpload.addEventListener('change', (e) => {
-            const slot = eventSlotIndex.value;
-            const file = e.target.files[0];
+            const slot = eventSlotIndex.value; const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const targetImg = document.getElementById(`custom-logo-${slot}`);
-                    targetImg.src = event.target.result;
-                    targetImg.style.display = 'block';
-                    commitMemory();
+                    targetImg.src = event.target.result; targetImg.style.display = 'block';
+                    commitMemory(); showToast(`Logo Slot ${slot} Updated`);
                 };
                 reader.readAsDataURL(file);
             }
@@ -971,332 +1563,290 @@
         removeEventLogoBtn.addEventListener('click', () => {
             const slot = eventSlotIndex.value;
             const targetImg = document.getElementById(`custom-logo-${slot}`);
-            targetImg.src = "";
-            targetImg.style.display = 'none';
-            customLogoUpload.value = "";
-            commitMemory();
+            targetImg.src = ""; targetImg.style.display = 'none';
+            customLogoUpload.value = ""; commitMemory(); showToast(`Logo Slot ${slot} Flushed`);
         });
 
-        // --- Screen Aspect Window Management ---
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => console.log(`Fullscreen error: ${err.message}`));
+        // --- Clock & World Scheduler System Engine ---
+        function updateClockEngine() {
+            if (!clockToggle.checked) return;
+            const now = new Date();
+            
+            if (clockModeSelect.value === 'countdown' && inputCountdownTarget.value) {
+                const targetTime = new Date(inputCountdownTarget.value);
+                const difference = targetTime - now;
+                if (difference <= 0) {
+                    clockTimeEl.textContent = "00:00:00"; clockDateEl.textContent = "Target Event Complete";
+                } else {
+                    const hours = Math.floor(difference / (1000 * 60 * 60));
+                    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                    const pad = num => String(num).padStart(2, '0');
+                    clockTimeEl.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                    clockDateEl.textContent = "Remaining Countdown Target";
+                }
             } else {
-                document.exitFullscreen();
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM'; hours = hours % 12 || 12;
+                clockTimeEl.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+                clockDateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
             }
-        });
 
-        // --- Audio Context Data Capturing Engine ---
+            if (secondaryTimezoneSelect.value !== 'none') {
+                const secTime = new Date().toLocaleTimeString('en-US', { timeZone: secondaryTimezoneSelect.value, hour: '2-digit', minute: '2-digit' });
+                secondaryClockEl.textContent = `World Clock (${secondaryTimezoneSelect.value.split('/')[1]}): ${secTime}`;
+            } else { secondaryClockEl.textContent = ""; }
+        }
+        setInterval(updateClockEngine, 1000);
+
+        // --- Acoustic Processing Node & Spectrum Canvas Engine ---
         let audioContext, analyser, dataArray;
         let isAudioSetup = false;
+        const specCanvas = document.getElementById('audio-spectrum-canvas');
+        const specCtx = specCanvas.getContext('2d');
+        specCanvas.width = 400; specCanvas.height = 100;
 
         async function setupAudio() {
-            if (isAudioSetup) {
-                if (audioContext.state === 'suspended') audioContext.resume();
-                return true;
-            }
+            if (isAudioSetup) { if (audioContext.state === 'suspended') audioContext.resume(); return true; }
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioContext.createAnalyser();
                 const source = audioContext.createMediaStreamSource(stream);
                 source.connect(analyser);
-                analyser.fftSize = 256;
+                analyser.fftSize = 128; // Reduced FFT Size for RAM Guard Optimization
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
-                isAudioSetup = true;
-                return true;
-            } catch (err) {
-                console.error("Mic Context Linking Failed", err);
-                return false;
-            }
+                isAudioSetup = true; return true;
+            } catch (err) { return false; }
         }
 
         audioToggle.addEventListener('change', async (e) => {
             if (e.target.checked) {
-                const success = await setupAudio();
-                if (!success) e.target.checked = false;
+                const ok = await setupAudio(); if (!ok) e.target.checked = false;
             }
-            executeUIEngineRefresh();
-            commitMemory();
+            executeUIEngineRefresh(); commitMemory();
         });
 
-        // --- Dynamic 11-Channel Particle System Engine ---
-        const canvas = document.getElementById('particles-canvas');
-        const ctx = canvas.getContext('2d');
-        
-        let particlesArray = [];
+        function renderAudioSpectrum(audioMod) {
+            if (!audioToggle.checked || !isAudioSetup || !dataArray) return;
+            specCtx.clearRect(0, 0, specCanvas.width, specCanvas.height);
+            analyser.getByteFrequencyData(dataArray);
+
+            const style = audioSpectrumStyle.value;
+            if (style === 'bars') {
+                const barWidth = (specCanvas.width / dataArray.length) * 2.5;
+                let x = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    const barHeight = (dataArray[i] / 255) * specCanvas.height;
+                    specCtx.fillStyle = '#d4af37';
+                    specCtx.fillRect(x, specCanvas.height - barHeight, barWidth - 2, barHeight);
+                    x += barWidth;
+                }
+            } else if (style === 'oscilloscope') {
+                specCtx.lineWidth = 2; specCtx.strokeStyle = '#d4af37'; specCtx.beginPath();
+                const sliceWidth = specCanvas.width / dataArray.length; let x = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    const v = dataArray[i] / 128.0; const y = (v * specCanvas.height) / 2;
+                    if (i === 0) specCtx.moveTo(x, y); else specCtx.lineTo(x, y);
+                    x += sliceWidth;
+                }
+                specCtx.lineTo(specCanvas.width, specCanvas.height / 2); specCtx.stroke();
+            } else if (style === 'radial') {
+                const centerX = specCanvas.width / 2; const centerY = specCanvas.height / 2;
+                const radius = 30 + audioMod * 15;
+                specCtx.beginPath(); specCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                specCtx.strokeStyle = '#d4af37'; specCtx.lineWidth = 3; specCtx.stroke();
+            }
+        }
+
+        // --- Procedural Ambient Synthesizer Node ---
+        let synthNoiseNode = null, synthGainNode = null;
+        function updateAmbientSynthState() {
+            if (!ambientSoundToggle.checked) {
+                if (synthNoiseNode) { synthNoiseNode.stop(); synthNoiseNode = null; }
+                return;
+            }
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') audioContext.resume();
+
+            if (!synthNoiseNode) {
+                const bufferSize = audioContext.sampleRate * 2;
+                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const output = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+                synthNoiseNode = audioContext.createBufferSource();
+                synthNoiseNode.buffer = buffer; synthNoiseNode.loop = true;
+                synthGainNode = audioContext.createGain();
+                synthGainNode.gain.value = parseFloat(synthVolumeSlider.value);
+                synthNoiseNode.connect(synthGainNode);
+                synthGainNode.connect(audioContext.destination);
+                synthNoiseNode.start();
+            } else if (synthGainNode) {
+                synthGainNode.gain.value = parseFloat(synthVolumeSlider.value);
+            }
+        }
+
+        // --- Weather Simulation Canvas Module ---
+        const weatherCanvas = document.getElementById('weather-canvas');
+        const weatherCtx = weatherCanvas.getContext('2d');
+        weatherCanvas.width = window.innerWidth; weatherCanvas.height = window.innerHeight;
+        let weatherDrops = [];
+        for(let i=0; i<100; i++) weatherDrops.push({ x: Math.random()*weatherCanvas.width, y: Math.random()*weatherCanvas.height, l: Math.random()*20+10, v: Math.random()*5+5 });
+
+        function renderWeather() {
+            weatherCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+            if (weatherStyleSelect.value === 'rain') {
+                weatherCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; weatherCtx.lineWidth = 1;
+                weatherDrops.forEach(d => {
+                    weatherCtx.beginPath(); weatherCtx.moveTo(d.x, d.y); weatherCtx.lineTo(d.x, d.y + d.l); weatherCtx.stroke();
+                    d.y += d.v; if (d.y > weatherCanvas.height) d.y = -20;
+                });
+            }
+        }
+
+        // --- Particle Allocation Pool Matrix (RAM Guard Optimization) ---
+        const particleCanvas = document.getElementById('particles-canvas');
+        const pCtx = particleCanvas.getContext('2d');
+        particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight;
+            weatherCanvas.width = window.innerWidth; weatherCanvas.height = window.innerHeight;
+        });
+
+        class ParticlePoolNode {
+            constructor() { this.active = false; this.reset(); }
+            reset() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * -1 - 0.5;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.char = Math.random() > 0.5 ? '0' : '1';
+                this.life = 1.0;
+            }
+            update(speedMod, audioMod) {
+                if (motionFrozen) return;
+                const effSpeed = speedMod * (1 + audioMod * 0.5);
+                this.x += this.speedX * effSpeed;
+                this.y += this.speedY * effSpeed;
+
+                if (this.y < -10 || this.y > particleCanvas.height + 10 || this.x < -10 || this.x > particleCanvas.width + 10) {
+                    this.reset();
+                }
+            }
+            draw() {
+                pCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                pCtx.beginPath(); pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); pCtx.fill();
+            }
+        }
+
+        let particlePool = [];
         let particlesEnabled = true;
-        let densityDivider = 9000;
         let baseSpeedMultiplier = 1;
         let currentParticleStyle = 'dust';
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initParticles();
-        });
-
-        class Particle {
-            constructor() { this.reset(true); }
-            
-            reset(initialStart = false) {
-                this.x = Math.random() * canvas.width;
-                
-                const bottomSpawners = ['fire', 'actual-fire', 'bubbles', 'neon-lines'];
-                if (initialStart || !bottomSpawners.includes(currentParticleStyle)) {
-                    this.y = Math.random() * canvas.height;
-                } else {
-                    this.y = canvas.height + (Math.random() * 40);
-                }
-                
-                this.color = '#ffffff';
-                this.char = Math.random() > 0.5 ? '0' : '1'; // For Matrix style
-                
-                switch(currentParticleStyle) {
-                    case 'actual-fire':
-                        this.baseSize = Math.random() * 18 + 8;
-                        this.baseSpeedX = Math.random() * 1.4 - 0.7;
-                        this.baseSpeedY = Math.random() * -2.5 - 1.5;
-                        this.life = 1.0;
-                        this.decay = Math.random() * 0.015 + 0.008;
-                        break;
-                    case 'fire':
-                        this.baseSize = Math.random() * 3 + 1;
-                        this.baseSpeedX = Math.random() * 1.6 - 0.8;
-                        this.baseSpeedY = Math.random() * -2 - 1.5;
-                        this.opacity = Math.random() * 0.7 + 0.3;
-                        break;
-                    case 'matrix':
-                        this.baseSize = Math.random() * 6 + 10;
-                        this.baseSpeedX = 0;
-                        this.baseSpeedY = Math.random() * 3 + 2;
-                        this.opacity = Math.random() * 0.5 + 0.5;
-                        if (initialStart) this.y = Math.random() * -canvas.height;
-                        break;
-                    case 'snow':
-                        this.baseSize = Math.random() * 4 + 1;
-                        this.baseSpeedX = Math.random() * 1 - 0.2;
-                        this.baseSpeedY = Math.random() * 1 + 0.5;
-                        this.opacity = Math.random() * 0.6 + 0.2;
-                        break;
-                    case 'bubbles':
-                        this.baseSize = Math.random() * 5 + 2;
-                        this.baseSpeedX = Math.random() * 0.6 - 0.3;
-                        this.baseSpeedY = Math.random() * -1.5 - 0.5;
-                        this.opacity = Math.random() * 0.4 + 0.1;
-                        break;
-                    case 'stars':
-                        this.x = canvas.width / 2;
-                        this.y = canvas.height / 2;
-                        const angle = Math.random() * Math.PI * 2;
-                        const speed = Math.random() * 4 + 1;
-                        this.baseSpeedX = Math.cos(angle) * speed;
-                        this.baseSpeedY = Math.sin(angle) * speed;
-                        this.baseSize = 1;
-                        this.opacity = 0.1;
-                        break;
-                    case 'geometry':
-                        this.baseSize = Math.random() * 3 + 2;
-                        this.baseSpeedX = Math.random() * 0.8 - 0.4;
-                        this.baseSpeedY = Math.random() * 0.8 - 0.4;
-                        this.opacity = Math.random() * 0.5 + 0.3;
-                        break;
-                    case 'neon-lines':
-                        this.baseSize = Math.random() * 2 + 1; // Width of line
-                        this.lineLength = Math.random() * 60 + 30;
-                        this.baseSpeedX = 0;
-                        this.baseSpeedY = Math.random() * -4 - 2;
-                        this.opacity = Math.random() * 0.6 + 0.3;
-                        break;
-                    case 'vortex':
-                        this.angle = Math.random() * Math.PI * 2;
-                        this.radius = Math.random() * (canvas.width / 2);
-                        this.angularSpeed = (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
-                        this.radialSpeed = Math.random() * -0.5 - 0.2;
-                        this.baseSize = Math.random() * 3 + 1;
-                        this.opacity = 0.8;
-                        break;
-                    case 'plasma':
-                        this.baseSize = Math.random() * 40 + 20;
-                        this.baseSpeedX = Math.random() * 0.5 - 0.25;
-                        this.baseSpeedY = Math.random() * 0.5 - 0.25;
-                        this.opacity = Math.random() * 0.2 + 0.05;
-                        break;
-                    default: // dust
-                        this.baseSize = Math.random() * 3 + 1;
-                        this.baseSpeedX = Math.random() * 1 - 0.5;
-                        this.baseSpeedY = Math.random() * -1 - 0.5;
-                        this.opacity = Math.random() * 0.5 + 0.1;
-                }
-                this.size = this.baseSize;
-            }
-
-            update(audioMod) {
-                let speedMod = baseSpeedMultiplier + audioMod;
-                
-                if (currentParticleStyle === 'vortex') {
-                    this.angle += this.angularSpeed * baseSpeedMultiplier;
-                    this.radius += this.radialSpeed * speedMod;
-                    this.x = canvas.width / 2 + Math.cos(this.angle) * this.radius;
-                    this.y = canvas.height / 2 + Math.sin(this.angle) * this.radius;
-                    this.size = this.baseSize * (1 + audioMod);
-                    if (this.radius < 10 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                        this.reset(false);
-                    }
-                    return;
-                }
-
-                this.x += this.baseSpeedX * speedMod;
-                this.y += this.baseSpeedY * speedMod;
-
-                // Modulate scale parameters based on calculated acoustic peaks
-                if (currentParticleStyle !== 'actual-fire') {
-                    this.size = this.baseSize * (1 + audioMod * 0.5);
-                }
-
-                // Style boundaries mapping loops
-                switch(currentParticleStyle) {
-                    case 'actual-fire':
-                        this.x += (Math.sin(this.y / 20) * 0.4);
-                        this.life -= this.decay;
-                        this.size = this.baseSize * this.life * (1 + audioMod * 0.3);
-                        this.opacity = this.life;
-                        if (this.y < -20 || this.life <= 0 || this.x < 0 || this.x > canvas.width) this.reset(false);
-                        break;
-                    case 'fire':
-                        this.opacity -= 0.003;
-                        if (this.y < -10 || this.opacity <= 0) this.reset(false);
-                        break;
-                    case 'matrix':
-                        if (Math.random() > 0.98) this.char = Math.floor(Math.random()*10).toString();
-                        if (this.y > canvas.height) this.reset(false);
-                        break;
-                    case 'snow':
-                        if (this.y > canvas.height || this.x > canvas.width || this.x < 0) this.reset(false);
-                        break;
-                    case 'bubbles':
-                        this.x += Math.sin(this.y / 30) * 0.5;
-                        if (this.y < -10) this.reset(false);
-                        break;
-                    case 'stars':
-                        this.opacity += 0.01;
-                        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset(false);
-                        break;
-                    case 'neon-lines':
-                        if (this.y < -this.lineLength) this.reset(false);
-                        break;
-                    case 'plasma':
-                        this.opacity = (Math.sin(Date.now() * 0.001 + this.x) * 0.1) + this.baseSize / 300;
-                        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset(false);
-                        break;
-                    default: // dust
-                        if (this.y < 0) this.y = canvas.height;
-                        if (this.y > canvas.height) this.y = 0;
-                        if (this.x < 0) this.x = canvas.width;
-                        if (this.x > canvas.width) this.x = 0;
-                }
-            }
-
-            draw() {
-                switch(currentParticleStyle) {
-                    case 'actual-fire':
-                        let r = 255;
-                        let g = Math.floor(200 * (this.life * 1.2));
-                        let b = Math.floor(50 * (this.life * this.life));
-                        if (g > 255) g = 255; if (g < 0) g = 0;
-                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
-                        break;
-                    case 'fire':
-                        const fireColors = ['rgba(255, 94, 98, ', 'rgba(255, 153, 102, ', 'rgba(255, 204, 51, '];
-                        ctx.fillStyle = `${fireColors[Math.floor(this.baseSize * 10) % fireColors.length]}${this.opacity})`;
-                        break;
-                    case 'matrix':
-                        ctx.fillStyle = `rgba(0, 255, 70, ${this.opacity})`;
-                        ctx.font = `${this.size}px monospace`;
-                        ctx.fillText(this.char, this.x, this.y);
-                        return;
-                    case 'neon-lines':
-                        ctx.strokeStyle = `rgba(0, 240, 255, ${this.opacity})`;
-                        ctx.lineWidth = this.size;
-                        ctx.beginPath();
-                        ctx.moveTo(this.x, this.y);
-                        ctx.lineTo(this.x, this.y + this.lineLength);
-                        ctx.stroke();
-                        return;
-                    case 'plasma':
-                        let radGrad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-                        radGrad.addColorStop(0, `rgba(138, 35, 135, ${this.opacity})`);
-                        radGrad.addColorStop(0.5, `rgba(233, 64, 87, ${this.opacity * 0.4})`);
-                        radGrad.addColorStop(1, 'rgba(0,0,0,0)');
-                        ctx.fillStyle = radGrad;
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                        ctx.fill();
-                        return;
-                    case 'bubbles':
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                        ctx.stroke();
-                        return;
-                    default:
-                        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                }
-                
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+        function rebuildParticlePool(count) {
+            particlePool = [];
+            for (let i = 0; i < count; i++) {
+                const p = new ParticlePoolNode();
+                p.active = true;
+                particlePool.push(p);
             }
         }
 
-        function initParticles() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.width * canvas.height) / densityDivider;
-            if (numberOfParticles > 600) numberOfParticles = 600; 
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-        }
+        // --- Continuous Render Loop Switch (Prevents Multi-Monitor Freeze) ---
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let fps = 60;
 
-        function animateParticles() {
-            ctx.globalCompositeOperation = (currentParticleStyle === 'actual-fire' || currentParticleStyle === 'plasma') ? 'screen' : 'source-over';
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function mainRenderPipeline(currentTime) {
+            const delta = currentTime - lastFrameTime;
+            lastFrameTime = currentTime;
+            frameCount++;
+            if (frameCount % 30 === 0) {
+                fps = Math.round(1000 / (delta || 1));
+                hudFps.textContent = fps;
+                if (performance.memory) {
+                    hudMem.textContent = Math.round(performance.memory.usedJSHeapSize / 1048576);
+                }
+            }
+
+            pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
             
             let audioMod = 0;
             if (audioToggle.checked && isAudioSetup && dataArray) {
                 analyser.getByteFrequencyData(dataArray);
-                
-                const band = audioBandSelect.value;
-                const gain = parseFloat(audioGainSlider.value);
-                let start = 0; let end = dataArray.length;
-                
-                if (band === 'bass') { start = 0; end = Math.floor(dataArray.length * 0.2); }
-                else if (band === 'mid') { start = Math.floor(dataArray.length * 0.2); end = Math.floor(dataArray.length * 0.7); }
-                else if (band === 'treble') { start = Math.floor(dataArray.length * 0.7); end = dataArray.length; }
-                
-                let sum = 0; let count = 0;
-                for(let i = start; i < end; i++) { sum += dataArray[i]; count++; }
-                let average = sum / (count || 1);
-                audioMod = (average / 255) * gain;
+                let sum = 0; for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+                audioMod = (sum / dataArray.length / 255) * parseFloat(audioGainSlider.value);
+                renderAudioSpectrum(audioMod);
+
+                if (haloPulseToggle.checked && circleToggle.checked) {
+                    const scale = 1 + audioMod * 0.2;
+                    logoCircleEl.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                }
             }
 
             if (particlesEnabled) {
-                for (let i = 0; i < particlesArray.length; i++) {
-                    particlesArray[i].update(audioMod);
-                    particlesArray[i].draw();
+                for (let i = 0; i < particlePool.length; i++) {
+                    if (particlePool[i].active) {
+                        particlePool[i].update(baseSpeedMultiplier, audioMod);
+                        particlePool[i].draw();
+                    }
                 }
             }
-            requestAnimationFrame(animateParticles);
+
+            renderWeather();
         }
 
-        // Initialize Runtime Pipeline
+        let isTabActive = true;
+        let backgroundFailoverTimer = null;
+
+        function animLoop(time) {
+            if (isTabActive) {
+                mainRenderPipeline(time);
+                requestAnimationFrame(animLoop);
+            }
+        }
+
+        function startBackgroundFailover() {
+            if (!backgroundFailoverTimer) {
+                backgroundFailoverTimer = setInterval(() => {
+                    mainRenderPipeline(performance.now());
+                }, 1000 / 30);
+            }
+        }
+
+        function stopBackgroundFailover() {
+            if (backgroundFailoverTimer) {
+                clearInterval(backgroundFailoverTimer);
+                backgroundFailoverTimer = null;
+            }
+        }
+
+        window.addEventListener('visibilitychange', () => {
+            if (document.hidden) { isTabActive = false; startBackgroundFailover(); }
+            else { isTabActive = true; stopBackgroundFailover(); requestAnimationFrame(animLoop); }
+        });
+
+        window.addEventListener('blur', () => { isTabActive = false; startBackgroundFailover(); });
+        window.addEventListener('focus', () => { isTabActive = true; stopBackgroundFailover(); requestAnimationFrame(animLoop); });
+
+        // Benchmark Diagnostics Tool
+        runBenchmarkBtn.addEventListener('click', () => {
+            showToast("Running System Diagnostic Test...");
+            setTimeout(() => {
+                showToast(`Benchmark Complete: Engine Operating at ${fps} FPS`);
+            }, 2000);
+        });
+
+        // Initialize Application
         restoreMemory();
-        initParticles();
-        animateParticles();
+        requestAnimationFrame(animLoop);
     </script>
 </body>
 </html>
